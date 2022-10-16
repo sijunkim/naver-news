@@ -6,6 +6,6 @@ export class HttpResponse {
   // }
 
   status?: number;
-  data?: string;
+  data?: any;
   message?: string;
 }

@@ -6,11 +6,12 @@ import naverConfig from './config/naverConfig';
 import { validationSchema } from './config/validationSchema';
 import { NaverController } from './naver/naver.controller';
 import { NaverService } from './naver/naver.service';
+import slackConfig from './config/slackConfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [naverConfig],
+      load: [naverConfig, slackConfig],
       isGlobal: true,
       validationSchema,
     }),

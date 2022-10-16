@@ -3,23 +3,41 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
 import naverConfig from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
-import convert from 'xml-js';
-import { XMLParser, XMLBuilder, XMLValidator } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
+import { News } from 'src/entity/news';
+import slackConfig from 'src/config/slackConfig';
 
 @Injectable()
 export class NaverService {
   constructor(
-    @Inject(naverConfig.KEY) private config: ConfigType<typeof naverConfig>,
+    @Inject(naverConfig.KEY)
+    private naverconfig: ConfigType<typeof naverConfig>,
+    @Inject(slackConfig.KEY)
+    private slackconfig: ConfigType<typeof slackConfig>,
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=100&start=1&sort=date`;
+    const querystring = `${encodeURI(keyword)}&display=10&start=1&sort=date`;
     const uri = `https://openapi.naver.com/v1/search/news.xml?query=${querystring}`;
     return {
       url: uri,
       headers: {
-        'X-Naver-Client-Id': this.config.client_id,
-        'X-Naver-Client-Secret': this.config.client_secret,
+        'X-Naver-Client-Id': this.naverconfig.client_id,
+        'X-Naver-Client-Secret': this.naverconfig.client_secret,
+      },
+    };
+  }
+
+  getSlackWebhookConfiguration(news: News): AxiosRequestConfig {
+    return {
+      url: this.slackconfig.url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: {
+        title: news.title,
+        description: news.description,
+        link: news.link,
       },
     };
   }
@@ -33,13 +51,22 @@ export class NaverService {
         headers: configuration.headers,
       });
       result.status = response.status;
-      console.log(response.data);
-      result.data = new XMLParser().parse(response.data);
+      const json = new XMLParser().parse(response.data);
+      result.data = json.rss.channel.item;
       result.message = 'success';
     } catch (error) {
       console.error(error);
     }
-
     return result;
+  }
+
+  async postNaverNewsToSlack(news: Array<News>) {
+    for (const item of news) {
+      const configuration = this.getSlackWebhookConfiguration(item);
+      const response = await axios.post(configuration.url, configuration.data, {
+        headers: configuration.headers,
+      });
+      console.log(response);
+    }
   }
 }
