@@ -7,6 +7,7 @@ import { validationSchema } from './config/validationSchema';
 import { NaverController } from './naver/naver.controller';
 import { NaverService } from './naver/naver.service';
 import slackConfig from './config/slackConfig';
+import SlackWebhook from './common/util/slackWebhook';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import slackConfig from './config/slackConfig';
     }),
   ],
   controllers: [AppController, NaverController],
-  providers: [AppService, NaverService],
+  providers: [AppService, NaverService, SlackWebhook],
 })
 export class AppModule {}

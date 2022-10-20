@@ -5,15 +5,14 @@ import naverConfig from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
-import slackConfig from 'src/config/slackConfig';
+import SlackWebhook from 'src/common/util/slackWebhook';
 
 @Injectable()
 export class NaverService {
   constructor(
     @Inject(naverConfig.KEY)
     private naverconfig: ConfigType<typeof naverConfig>,
-    @Inject(slackConfig.KEY)
-    private slackconfig: ConfigType<typeof slackConfig>,
+    private readonly slackWebhook: SlackWebhook,
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
@@ -24,20 +23,6 @@ export class NaverService {
       headers: {
         'X-Naver-Client-Id': this.naverconfig.client_id,
         'X-Naver-Client-Secret': this.naverconfig.client_secret,
-      },
-    };
-  }
-
-  getSlackWebhookConfiguration(news: News): AxiosRequestConfig {
-    return {
-      url: this.slackconfig.url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        title: news.title,
-        description: news.description,
-        link: news.link,
       },
     };
   }
@@ -60,13 +45,18 @@ export class NaverService {
     return result;
   }
 
-  async postNaverNewsToSlack(news: Array<News>) {
-    for (const item of news) {
-      const configuration = this.getSlackWebhookConfiguration(item);
-      const response = await axios.post(configuration.url, configuration.data, {
-        headers: configuration.headers,
-      });
-      console.log(response);
+  async postNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
+    try {
+      for (const item of news) {
+        await this.slackWebhook.send(item);
+      }
+      return {
+        status: 200,
+        message: 'success',
+        data: '',
+      };
+    } catch (error) {
+      console.error(error);
     }
   }
 }
