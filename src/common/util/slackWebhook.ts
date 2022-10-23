@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { IncomingWebhook } from '@slack/webhook';
 import slackConfig from 'src/config/slackConfig';
-import { News } from 'src/entity/news';
 
 @Injectable()
 export default class SlackWebhook {
@@ -11,8 +10,8 @@ export default class SlackWebhook {
     private slackconfig: ConfigType<typeof slackConfig>,
   ) {}
 
-  async send(news: News) {
+  async send(payload: any) {
     const webhook = new IncomingWebhook(this.slackconfig.url);
-    await webhook.send(JSON.stringify(news));
+    await webhook.send(payload);
   }
 }

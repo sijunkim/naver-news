@@ -6,6 +6,7 @@ import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
+import NewsRefiner from 'src/common/util/newsRefiner';
 
 @Injectable()
 export class NaverService {
@@ -13,10 +14,11 @@ export class NaverService {
     @Inject(naverConfig.KEY)
     private naverconfig: ConfigType<typeof naverConfig>,
     private readonly slackWebhook: SlackWebhook,
+    private readonly newsRefiner: NewsRefiner,
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=10&start=1&sort=date`;
+    const querystring = `${encodeURI(keyword)}&display=3&start=1&sort=date`;
     const uri = `https://openapi.naver.com/v1/search/news.xml?query=${querystring}`;
     return {
       url: uri,
@@ -45,10 +47,53 @@ export class NaverService {
     return result;
   }
 
-  async postNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
+  refineNews(news: News): any {
+    return {
+      text: news.title,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*<${news.link}|${news.title}>*`,
+          },
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'plain_text',
+              text: news.pubDate,
+            },
+          ],
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: news.description,
+            emoji: true,
+          },
+        },
+        {
+          type: 'divider',
+        },
+      ],
+    };
+  }
+
+  async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
     try {
       for (const item of news) {
-        await this.slackWebhook.send(item);
+        // 데이터 정제하는 부분
+        item.title = this.newsRefiner.htmlParsingToText(item.title);
+        item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
+        item.description = this.newsRefiner.htmlParsingToText(item.description);
+
+        // 메세지 폼 만드는 부분
+        const payload = this.refineNews(item);
+
+        await this.slackWebhook.send(payload);
       }
       return {
         status: 200,

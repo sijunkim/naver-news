@@ -8,6 +8,7 @@ import { NaverController } from './naver/naver.controller';
 import { NaverService } from './naver/naver.service';
 import slackConfig from './config/slackConfig';
 import SlackWebhook from './common/util/slackWebhook';
+import NewsRefiner from './common/util/newsRefiner';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import SlackWebhook from './common/util/slackWebhook';
     }),
   ],
   controllers: [AppController, NaverController],
-  providers: [AppService, NaverService, SlackWebhook],
+  providers: [AppService, NaverService, SlackWebhook, NewsRefiner],
 })
 export class AppModule {}
