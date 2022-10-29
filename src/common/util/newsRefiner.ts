@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import newsCompany from 'src/data/raw/newsCompany';
 
 @Injectable()
 export default class NewsRefiner {
@@ -46,5 +47,74 @@ export default class NewsRefiner {
       .replace(/&amp;/gi, '&')
       .replace(/`/gi, "'")
       .replace(/&apos;/gi, "'");
+  }
+
+  getNewsCompanyList() {
+    return newsCompany.getCompanyList();
+  }
+
+  substractComapny(link: string, originallink: string) {
+    const list = this.getNewsCompanyList();
+    const address = originallink
+      .toLowerCase()
+      .replace(
+        /^(https?:\/?\/?)?(\/?\/?www\.)?(\/?\/?news\.)?(\/?\/?view\.)?(\/?\/?post\.)?(\/?\/?photo\.)?(\/?\/?photos\.)?(\/?\/?blog\.)?/,
+        '',
+      );
+    const domain = address.match(/^([^:\/\n\?\=]+)/)[0];
+
+    const index = this.searchSourceIndex(address, list);
+    if (index >= 0 && index <= list.length - 1) {
+      return list[index][1];
+    } else if (domain) {
+      return domain;
+    } else {
+      return '(알수없음)';
+    }
+  }
+
+  searchSourceIndex(address, list) {
+    let left = 0;
+    let right = list.length - 1;
+
+    while (left <= right) {
+      const index = Math.floor((left + right) / 2);
+      const address_stripped = address.substr(0, list[index][0].length);
+
+      if (address_stripped === list[index][0]) {
+        return this.checkSourceIndex(index, list, address, address_stripped);
+      } else if (address_stripped < list[index][0]) {
+        right = index - 1;
+      } else {
+        left = index + 1;
+      }
+    }
+
+    return -1;
+  }
+
+  checkSourceIndex(index, list, address, address_stripped) {
+    let i = index;
+
+    while (i + 1 <= list.length - 1) {
+      if (list[i + 1][0].includes(address_stripped)) {
+        i++;
+      } else {
+        break;
+      }
+    }
+
+    if (i === index) {
+      return index;
+    }
+
+    while (i >= index) {
+      if (address.includes(list[i][0])) {
+        return i;
+      }
+      i--;
+    }
+
+    return -1;
   }
 }
