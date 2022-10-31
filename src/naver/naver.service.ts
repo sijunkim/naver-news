@@ -89,10 +89,7 @@ export class NaverService {
         item.title = this.newsRefiner.htmlParsingToText(item.title);
         item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
         item.description = this.newsRefiner.htmlParsingToText(item.description);
-        item.company = this.newsRefiner.substractComapny(
-          item.link,
-          item.originallink,
-        );
+        item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
 
         // 메세지 폼 만드는 부분
         const payload = this.refineNews(item);

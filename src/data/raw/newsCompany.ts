@@ -330,10 +330,6 @@ export default class newsCompany {
       ['jibs.co.kr', 'JIBS'],
       ['jjan.kr', '전북일보'],
       ['jjn.co.kr', '전북중앙'],
-      [
-        'jmagazine.joins.com/economist?cloc=joongang-home-jmnet',
-        '이코노미스트',
-      ],
       ['jmagazine.joins.com/forbes', '포브스코리아'],
       ['jmagazine.joins.com/monthly', '월간중앙'],
       ['jmbc.co.kr', '전주MBC'],
