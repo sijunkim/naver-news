@@ -9,6 +9,8 @@ import { NaverService } from './naver/naver.service';
 import slackConfig from './config/slackConfig';
 import SlackWebhook from './common/util/slackWebhook';
 import NewsRefiner from './common/util/newsRefiner';
+import NaverBatch from './naver/naver.batch';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -17,8 +19,9 @@ import NewsRefiner from './common/util/newsRefiner';
       isGlobal: true,
       validationSchema,
     }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController, NaverController],
-  providers: [AppService, NaverService, SlackWebhook, NewsRefiner],
+  providers: [AppService, NaverService, NaverBatch, SlackWebhook, NewsRefiner],
 })
 export class AppModule {}

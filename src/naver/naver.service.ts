@@ -18,7 +18,7 @@ export class NaverService {
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=3&start=1&sort=date`;
+    const querystring = `${encodeURI(keyword)}&display=5&start=1&sort=date`;
     const uri = `https://openapi.naver.com/v1/search/news.xml?query=${querystring}`;
     return {
       url: uri,
@@ -27,6 +27,17 @@ export class NaverService {
         'X-Naver-Client-Secret': this.naverconfig.client_secret,
       },
     };
+  }
+
+  async getBreakingNews(news: Array<News>) {
+    const breakingNews: Array<News> = new Array<News>();
+    for (const item of news) {
+      if (item.title.includes('속보')) {
+        breakingNews.push(item);
+      }
+    }
+
+    return breakingNews;
   }
 
   async getNaverNews(keyword: string): Promise<HttpResponse> {
