@@ -7,6 +7,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
+import * as fs from 'fs';
 
 @Injectable()
 export class NaverService {
@@ -58,7 +59,7 @@ export class NaverService {
     return result;
   }
 
-  refineNews(news: News): any {
+  async refineNews(news: News): Promise<any> {
     return {
       text: news.title,
       blocks: [
@@ -93,27 +94,43 @@ export class NaverService {
     };
   }
 
+  async setLastReceivedTime(firstItemPubDate: string) {
+    await fs.writeFileSync('src/data/time/lastReceivedTime.txt', firstItemPubDate);
+  }
+
+  async getLastReceivedTime() {
+    return await fs.readFileSync('src/data/time/lastReceivedTime.txt', { encoding: 'utf8' });
+  }
+
   async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
-    try {
-      for (const item of news) {
-        // 데이터 정제하는 부분
-        item.title = this.newsRefiner.htmlParsingToText(item.title);
-        item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
-        item.description = this.newsRefiner.htmlParsingToText(item.description);
-        item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
+    const firstItemPubDate: string = news[0].pubDate;
+    const lastReceivedTime = await this.getLastReceivedTime();
 
-        // 메세지 폼 만드는 부분
-        const payload = this.refineNews(item);
+    for (const item of news.reverse()) {
+      if (new Date(lastReceivedTime) < new Date(item.pubDate)) {
+        try {
+          // 데이터 정제하는 부분
+          item.title = this.newsRefiner.htmlParsingToText(item.title);
+          item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
+          item.description = this.newsRefiner.htmlParsingToText(item.description);
+          item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
 
-        await this.slackWebhook.send(payload);
+          // 메세지 폼 만드는 부분
+          const payload = await this.refineNews(item);
+
+          await this.slackWebhook.send(payload);
+        } catch (error) {
+          console.error(error);
+        }
       }
-      return {
-        status: 200,
-        message: 'success',
-        data: '',
-      };
-    } catch (error) {
-      console.error(error);
     }
+
+    await this.setLastReceivedTime(firstItemPubDate);
+
+    return {
+      status: 200,
+      message: 'success',
+      data: '',
+    };
   }
 }
