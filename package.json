@@ -32,6 +32,7 @@
     "axios": "^0.26.1",
     "dotenv": "^16.0.3",
     "fast-xml-parser": "^4.0.11",
+    "fs": "^0.0.1-security",
     "joi": "^17.6.3",
     "nestjs-slack-webhook": "^8.2.3",
     "reflect-metadata": "^0.1.13",
