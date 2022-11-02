@@ -94,6 +94,10 @@ export class NaverService {
     };
   }
 
+  async makeEmptyKeywordFile() {
+    await fs.writeFileSync('src/data/keyword/keyword.txt', '');
+  }
+
   async setLastReceivedTime(firstItemPubDate: string) {
     await fs.writeFileSync('src/data/time/lastReceivedTime.txt', firstItemPubDate);
   }
@@ -102,12 +106,36 @@ export class NaverService {
     return await fs.readFileSync('src/data/time/lastReceivedTime.txt', { encoding: 'utf8' });
   }
 
-  async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
-    const firstItemPubDate: string = news[0].pubDate;
+  async checkNewsPubDate(news: News): Promise<boolean> {
     const lastReceivedTime = await this.getLastReceivedTime();
 
+    return new Date(lastReceivedTime) < new Date(news.pubDate);
+  }
+
+  async checkNewsKeyword(news: News): Promise<boolean> {
+    let containCount = 0;
+    const rawKeywords = await fs.readFileSync('src/data/time/lastReceivedTime.txt', { encoding: 'utf8' });
+    const keywords: string[] = rawKeywords.split(' ');
+    for (const keyword of keywords) {
+      if (news.title.includes(keyword)) containCount++;
+    }
+
+    // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
+    return containCount >= 5 ? false : true;
+  }
+
+  async checkNewsJustified(news: News): Promise<boolean> {
+    const pubDateStatus: boolean = await this.checkNewsPubDate(news);
+    const keywordStatus: boolean = await this.checkNewsKeyword(news);
+
+    return pubDateStatus && keywordStatus;
+  }
+
+  async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
+    const firstItemPubDate: string = news[0].pubDate;
+
     for (const item of news.reverse()) {
-      if (new Date(lastReceivedTime) < new Date(item.pubDate)) {
+      if (await this.checkNewsJustified(item)) {
         try {
           // 데이터 정제하는 부분
           item.title = this.newsRefiner.htmlParsingToText(item.title);
@@ -118,7 +146,11 @@ export class NaverService {
           // 메세지 폼 만드는 부분
           const payload = await this.refineNews(item);
 
+          // 메세지 전송
           await this.slackWebhook.send(payload);
+
+          // 키워드 설정
+          // await this.setKeyword(item.title);
         } catch (error) {
           console.error(error);
         }
