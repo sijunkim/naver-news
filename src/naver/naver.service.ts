@@ -114,7 +114,7 @@ export class NaverService {
 
   async checkNewsKeyword(news: News): Promise<boolean> {
     let containCount = 0;
-    const rawKeywords = await fs.readFileSync('src/data/time/lastReceivedTime.txt', { encoding: 'utf8' });
+    const rawKeywords = await fs.readFileSync('src/data/keyword/keyword.txt', { encoding: 'utf8' });
     const keywords: string[] = rawKeywords.split(' ');
     for (const keyword of keywords) {
       if (news.title.includes(keyword)) containCount++;
@@ -129,6 +129,18 @@ export class NaverService {
     const keywordStatus: boolean = await this.checkNewsKeyword(news);
 
     return pubDateStatus && keywordStatus;
+  }
+
+  async setKeyword(news: News) {
+    const savedRawKeywords = await fs.readFileSync('src/data/keyword/keyword.txt', { encoding: 'utf8' });
+    let rawKeywords = '';
+    for (const keyword of news.title.split(' ')) {
+      if (savedRawKeywords.includes(keyword) == false) {
+        rawKeywords += `${keyword},`;
+      }
+    }
+
+    await fs.appendFileSync('src/data/keyword/keyword.txt', rawKeywords, { encoding: 'utf8' });
   }
 
   async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
@@ -150,9 +162,9 @@ export class NaverService {
           await this.slackWebhook.send(payload);
 
           // 키워드 설정
-          // await this.setKeyword(item.title);
+          await this.setKeyword(item);
         } catch (error) {
-          console.error(error);
+          console.error(error.original.config.data);
         }
       }
     }
