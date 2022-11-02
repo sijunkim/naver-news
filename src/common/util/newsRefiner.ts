@@ -30,7 +30,9 @@ export default class NewsRefiner {
   }
 
   htmlParsingToText(description: string): string {
-    return description
+    const result = description ?? '내용없음';
+
+    return result
       .replace(/(<([^>]+)>)/gi, '')
       .replace(/&quot;/gi, '"')
       .replace(/&#039;/gi, "'")

@@ -83,7 +83,7 @@ export class NaverService {
           type: 'section',
           text: {
             type: 'plain_text',
-            text: news.description,
+            text: `${news.description ?? '내용없음'}`,
             emoji: true,
           },
         },
