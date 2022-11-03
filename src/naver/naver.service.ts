@@ -115,13 +115,14 @@ export class NaverService {
   async checkNewsKeyword(news: News): Promise<boolean> {
     let containCount = 0;
     const rawKeywords = await fs.readFileSync('src/data/keyword/keyword.txt', { encoding: 'utf8' });
-    const keywords: string[] = rawKeywords.split(' ');
+    const keywords: string[] = rawKeywords.split(',');
+    const title = news.title.replace(' ', '');
     for (const keyword of keywords) {
-      if (news.title.includes(keyword)) containCount++;
+      if (title.includes(keyword)) containCount++;
     }
 
     // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
-    return containCount >= 5 ? false : true;
+    return containCount >= 3 ? false : true;
   }
 
   async checkNewsJustified(news: News): Promise<boolean> {
