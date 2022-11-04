@@ -122,7 +122,7 @@ export class NaverService {
     }
 
     // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
-    return containCount >= 3 ? false : true;
+    return containCount >= 4 ? false : true;
   }
 
   async checkNewsJustified(news: News): Promise<boolean> {
