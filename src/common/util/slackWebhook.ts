@@ -11,7 +11,7 @@ export default class SlackWebhook {
   ) {}
 
   async send(payload: any) {
-    const webhook = new IncomingWebhook(this.slackconfig.url);
+    const webhook = new IncomingWebhook(this.slackconfig.breaking_news_webhook_url);
     await webhook.send(payload);
   }
 }

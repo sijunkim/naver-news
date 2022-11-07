@@ -14,6 +14,13 @@ export default class NaverBatch {
     await this.naverService.sendNaverNewsToSlack(breakingNews);
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async exclusiveNewsCron() {
+    const result = await this.naverService.getNaverNews('단독');
+    const breakingNews: Array<News> = await this.naverService.getExclusiveNews(result.data);
+    await this.naverService.sendNaverNewsToSlack(breakingNews);
+  }
+
   @Cron(CronExpression.EVERY_2_HOURS)
   async makeKeywordFilesCron() {
     await this.naverService.makeEmptyKeywordFile();

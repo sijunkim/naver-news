@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
+import slackConfig from 'src/config/slackConfig';
 import naverConfig from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
@@ -14,15 +15,17 @@ export class NaverService {
   constructor(
     @Inject(naverConfig.KEY)
     private naverconfig: ConfigType<typeof naverConfig>,
+    @Inject(slackConfig.KEY)
+    private slackconfig: ConfigType<typeof slackConfig>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
     const querystring = `${encodeURI(keyword)}&display=5&start=1&sort=date`;
-    const uri = `https://openapi.naver.com/v1/search/news.xml?query=${querystring}`;
+    const url = `${this.naverconfig.openapi_url}${querystring}`;
     return {
-      url: uri,
+      url: url,
       headers: {
         'X-Naver-Client-Id': this.naverconfig.client_id,
         'X-Naver-Client-Secret': this.naverconfig.client_secret,
@@ -31,6 +34,17 @@ export class NaverService {
   }
 
   async getBreakingNews(news: Array<News>) {
+    const breakingNews: Array<News> = new Array<News>();
+    for (const item of news) {
+      if (item.title.includes('속보')) {
+        breakingNews.push(item);
+      }
+    }
+
+    return breakingNews;
+  }
+
+  async getExclusiveNews(news: Array<News>) {
     const breakingNews: Array<News> = new Array<News>();
     for (const item of news) {
       if (item.title.includes('속보')) {
