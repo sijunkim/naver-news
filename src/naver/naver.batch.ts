@@ -21,8 +21,8 @@ export default class NaverBatch {
   @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
     const result = await this.exclusiveNewsService.getNaverNews('단독');
-    const breakingNews: Array<News> = await this.exclusiveNewsService.getExclusiveNews(result.data);
-    await this.exclusiveNewsService.sendNaverNewsToSlack(breakingNews);
+    const exclusiveNews: Array<News> = await this.exclusiveNewsService.getExclusiveNews(result.data);
+    await this.exclusiveNewsService.sendNaverNewsToSlack(exclusiveNews);
   }
 
   // @Cron(CronExpression.EVERY_2_HOURS)
