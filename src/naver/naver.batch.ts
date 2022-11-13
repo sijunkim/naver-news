@@ -19,7 +19,7 @@ export default class NaverBatch {
     if (breakingNews.length > 0) await this.breakingNewsService.sendNaverNewsToSlack(breakingNews);
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
     const result = await this.exclusiveNewsService.getNaverNews('단독');
     const exclusiveNews: Array<News> = await this.exclusiveNewsService.getExclusiveNews(result.data);
