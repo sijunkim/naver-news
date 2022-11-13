@@ -45,14 +45,14 @@ export class NaverService {
   }
 
   async getExclusiveNews(news: Array<News>) {
-    const breakingNews: Array<News> = new Array<News>();
+    const exclusiveNews: Array<News> = new Array<News>();
     for (const item of news) {
-      if (item.title.includes('속보')) {
-        breakingNews.push(item);
+      if (item.title.includes('단독')) {
+        exclusiveNews.push(item);
       }
     }
 
-    return breakingNews;
+    return exclusiveNews;
   }
 
   async getNaverNews(keyword: string): Promise<HttpResponse> {
@@ -136,7 +136,7 @@ export class NaverService {
     }
 
     // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
-    return containCount >= 4 ? false : true;
+    return containCount >= 3 ? false : true;
   }
 
   async checkNewsJustified(news: News): Promise<boolean> {
@@ -179,7 +179,7 @@ export class NaverService {
           // 키워드 설정
           await this.setKeyword(item);
         } catch (error) {
-          console.error(error.original.config.data);
+          console.error(error);
         }
       }
     }

@@ -7,31 +7,22 @@ import { NaverService } from './naver.service';
 export default class NaverBatch {
   constructor(private readonly naverService: NaverService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async breakingNewsCron() {
-    const result = await this.naverService.getNaverNews('속보');
-    const breakingNews: Array<News> = await this.naverService.getBreakingNews(result.data);
-    await this.naverService.sendNaverNewsToSlack(breakingNews);
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
-  async exclusiveNewsCron() {
-    const result = await this.naverService.getNaverNews('단독');
-    const breakingNews: Array<News> = await this.naverService.getExclusiveNews(result.data);
-    await this.naverService.sendNaverNewsToSlack(breakingNews);
-  }
-
-  @Cron(CronExpression.EVERY_2_HOURS)
-  async makeKeywordFilesCron() {
-    await this.naverService.makeEmptyKeywordFile();
-  }
-
-  // @Cron(CronExpression.EVERY_SECOND)
-  // async makeKeywordFilesCron() {
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async breakingNewsCron() {
   //   const result = await this.naverService.getNaverNews('속보');
   //   const breakingNews: Array<News> = await this.naverService.getBreakingNews(result.data);
-  //   for (const news of breakingNews) {
-  //     await this.naverService.setKeyword(news);
-  //   }
+  //   await this.naverService.sendNaverNewsToSlack(breakingNews);
+  // }
+
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async exclusiveNewsCron() {
+  //   const result = await this.naverService.getNaverNews('단독');
+  //   const breakingNews: Array<News> = await this.naverService.getExclusiveNews(result.data);
+  //   await this.naverService.sendNaverNewsToSlack(breakingNews);
+  // }
+
+  // @Cron(CronExpression.EVERY_2_HOURS)
+  // async makeKeywordFilesCron() {
+  //   await this.naverService.makeEmptyKeywordFile();
   // }
 }
