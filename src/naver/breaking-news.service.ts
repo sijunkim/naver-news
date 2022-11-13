@@ -109,15 +109,15 @@ export class BreakingNewsService {
   }
 
   async makeEmptyKeywordFile() {
-    await fs.writeFileSync('src/data/keyword/keyword.txt', '');
+    await fs.writeFileSync('src/data/keyword/breakingKeyword.txt', '');
   }
 
   async setLastReceivedTime(firstItemPubDate: string) {
-    await fs.writeFileSync('src/data/time/lastReceivedTime.txt', firstItemPubDate);
+    await fs.writeFileSync('src/data/time/breakingLastReceivedTime.txt', firstItemPubDate);
   }
 
   async getLastReceivedTime() {
-    return await fs.readFileSync('src/data/time/lastReceivedTime.txt', { encoding: 'utf8' });
+    return await fs.readFileSync('src/data/time/breakingLastReceivedTime.txt', { encoding: 'utf8' });
   }
 
   async checkNewsPubDate(news: News): Promise<boolean> {
@@ -128,7 +128,7 @@ export class BreakingNewsService {
 
   async checkNewsKeyword(news: News): Promise<boolean> {
     let containCount = 0;
-    const rawKeywords = await fs.readFileSync('src/data/keyword/keyword.txt', { encoding: 'utf8' });
+    const rawKeywords = await fs.readFileSync('src/data/keyword/breakingKeyword.txt', { encoding: 'utf8' });
     const keywords: string[] = rawKeywords.split(',');
     const title = news.title.replace(' ', '');
     for (const keyword of keywords) {
@@ -147,7 +147,7 @@ export class BreakingNewsService {
   }
 
   async setKeyword(news: News) {
-    const savedRawKeywords = await fs.readFileSync('src/data/keyword/keyword.txt', { encoding: 'utf8' });
+    const savedRawKeywords = await fs.readFileSync('src/data/keyword/breakingKeyword.txt', { encoding: 'utf8' });
     let rawKeywords = '';
     for (const keyword of news.title.split(' ')) {
       if (savedRawKeywords.includes(keyword) == false) {
@@ -155,7 +155,7 @@ export class BreakingNewsService {
       }
     }
 
-    await fs.appendFileSync('src/data/keyword/keyword.txt', rawKeywords, { encoding: 'utf8' });
+    await fs.appendFileSync('src/data/keyword/breakingKeyword.txt', rawKeywords, { encoding: 'utf8' });
   }
 
   async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
@@ -174,7 +174,7 @@ export class BreakingNewsService {
           const payload = await this.refineNews(item);
 
           // 메세지 전송
-          await this.slackWebhook.send(payload);
+          await this.slackWebhook.breakingNewsSend(payload);
 
           // 키워드 설정
           await this.setKeyword(item);
