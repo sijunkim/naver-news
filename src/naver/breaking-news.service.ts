@@ -22,7 +22,7 @@ export class BreakingNewsService {
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=5&start=1&sort=date`;
+    const querystring = `${encodeURI(keyword)}&display=10&start=1&sort=date`;
     const url = `${this.naverconfig.openapi_url}${querystring}`;
     return {
       url: url,
