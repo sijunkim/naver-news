@@ -11,7 +11,7 @@ import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
 
 @Injectable()
-export class NaverService {
+export class BreakingNewsService {
   constructor(
     @Inject(naverConfig.KEY)
     private naverconfig: ConfigType<typeof naverConfig>,

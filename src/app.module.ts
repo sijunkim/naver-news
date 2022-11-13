@@ -6,7 +6,8 @@ import naverConfig from './config/naverConfig';
 import slackConfig from './config/slackConfig';
 import { validationSchema } from './config/validationSchema';
 import { NaverController } from './naver/naver.controller';
-import { NaverService } from './naver/naver.service';
+import { BreakingNewsService } from './naver/breaking-news.service';
+import { ExclusiveNewsService } from './naver/exclusive-news.service';
 import SlackWebhook from './common/util/slackWebhook';
 import NewsRefiner from './common/util/newsRefiner';
 import NaverBatch from './naver/naver.batch';
@@ -22,6 +23,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController, NaverController],
-  providers: [AppService, NaverService, NaverBatch, SlackWebhook, NewsRefiner],
+  providers: [AppService, BreakingNewsService, ExclusiveNewsService, NaverBatch, SlackWebhook, NewsRefiner],
 })
 export class AppModule {}
