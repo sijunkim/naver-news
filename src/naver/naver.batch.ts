@@ -27,8 +27,9 @@ export default class NaverBatch {
     if (exclusiveNews.length > 0) await this.exclusiveNewsService.sendNaverNewsToSlack(exclusiveNews);
   }
 
-  // @Cron(CronExpression.EVERY_2_HOURS)
-  // async makeKeywordFilesCron() {
-  //   await this.naverService.makeEmptyKeywordFile();
-  // }
+  @Cron(CronExpression.EVERY_2_HOURS)
+  async makeKeywordFilesCron() {
+    await this.breakingNewsService.makeEmptyKeywordFile();
+    await this.exclusiveNewsService.makeEmptyKeywordFile();
+  }
 }

@@ -38,4 +38,4 @@ lerna-debug.log*
 .env
 
 # txt file
-.txt
+*.txt
