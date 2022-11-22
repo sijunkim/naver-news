@@ -49,6 +49,7 @@ export class ExclusiveNewsService {
     for (const item of news) {
       if (item.title.includes('단독')) {
         exclusiveNews.push(item);
+        console.log(item.title);
       }
     }
 
