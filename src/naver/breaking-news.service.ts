@@ -38,7 +38,7 @@ export class BreakingNewsService {
     for (const item of news) {
       if (item.title.includes('속보')) {
         breakingNews.push(item);
-        console.log(item.title);
+        // console.log(item.title);
       }
     }
 
