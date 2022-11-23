@@ -116,7 +116,7 @@ export class ExclusiveNewsService {
     let containCount = 0;
     const rawKeywords = await fs.readFileSync('src/data/keyword/exclusiveKeyword.txt', { encoding: 'utf8' });
     const keywords: string[] = rawKeywords.split(',');
-    const title = news.title.replace(' ', '');
+    const title = news.title.replaceAll(' ', '');
     for (const keyword of keywords) {
       if (title.includes(keyword)) containCount++;
     }
@@ -125,11 +125,23 @@ export class ExclusiveNewsService {
     return containCount >= 3 ? false : true;
   }
 
+  async checkNewsExcept(news: News): Promise<boolean> {
+    const rawKeywords = await fs.readFileSync('src/data/except/exclusiveKeyword.txt', { encoding: 'utf8' });
+    const keywords: string[] = rawKeywords.split(',');
+    const title = news.title.replaceAll(' ', '');
+    for (const keyword of keywords) {
+      if (title.includes(keyword)) return false;
+    }
+
+    return true;
+  }
+
   async checkNewsJustified(news: News): Promise<boolean> {
     const pubDateStatus: boolean = await this.checkNewsPubDate(news);
     const keywordStatus: boolean = await this.checkNewsKeyword(news);
+    const exceptStatus: boolean = await this.checkNewsExcept(news);
 
-    return pubDateStatus && keywordStatus;
+    return pubDateStatus && keywordStatus && exceptStatus;
   }
 
   async setKeyword(news: News) {
