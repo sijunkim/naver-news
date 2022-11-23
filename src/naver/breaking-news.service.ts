@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
-import slackConfig from 'src/config/slackConfig';
 import naverConfig from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
@@ -15,8 +14,6 @@ export class BreakingNewsService {
   constructor(
     @Inject(naverConfig.KEY)
     private naverconfig: ConfigType<typeof naverConfig>,
-    @Inject(slackConfig.KEY)
-    private slackconfig: ConfigType<typeof slackConfig>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
@@ -38,22 +35,10 @@ export class BreakingNewsService {
     for (const item of news) {
       if (item.title.includes('속보')) {
         breakingNews.push(item);
-        // console.log(item.title);
       }
     }
 
     return breakingNews;
-  }
-
-  async getExclusiveNews(news: Array<News>) {
-    const exclusiveNews: Array<News> = new Array<News>();
-    for (const item of news) {
-      if (item.title.includes('단독')) {
-        exclusiveNews.push(item);
-      }
-    }
-
-    return exclusiveNews;
   }
 
   async getNaverNews(keyword: string): Promise<HttpResponse> {
