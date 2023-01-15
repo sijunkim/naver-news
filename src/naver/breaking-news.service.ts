@@ -8,6 +8,7 @@ import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
+import { BreakingNewsType } from '../common/type/naver';
 
 @Injectable()
 export class BreakingNewsService {
@@ -33,7 +34,7 @@ export class BreakingNewsService {
   async getBreakingNews(news: Array<News>) {
     const breakingNews: Array<News> = new Array<News>();
     for (const item of news) {
-      if (item.title.includes('속보')) {
+      if (item.title.includes(BreakingNewsType)) {
         breakingNews.push(item);
       }
     }
