@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { News } from 'src/entity/news';
 import { BreakingNewsService } from './breaking-news.service';
 import { ExclusiveNewsService } from './exclusive-news.service';
@@ -12,7 +12,7 @@ export default class NaverBatch {
     private readonly exclusiveNewsService: ExclusiveNewsService,
   ) {}
 
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
     if (process.env.NODE_ENV === NODE_ENV) {
       const result = await this.breakingNewsService.getNaverNews(BreakingNewsType);
@@ -21,7 +21,7 @@ export default class NaverBatch {
     }
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
     if (process.env.NODE_ENV === NODE_ENV) {
       const result = await this.exclusiveNewsService.getNaverNews(ExclusiveNewsType);
