@@ -184,6 +184,8 @@ export class ExclusiveNewsService {
 
     await this.setLastReceivedTime(firstItemPubDate);
 
+    console.log(`${new Date()}->exclusiveNewsCron`);
+
     return {
       status: 200,
       message: 'success',

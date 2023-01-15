@@ -172,6 +172,8 @@ export class BreakingNewsService {
 
     await this.setLastReceivedTime(firstItemPubDate);
 
+    console.log(`${new Date()}->breakingNewsCron`);
+
     return {
       status: 200,
       message: 'success',
