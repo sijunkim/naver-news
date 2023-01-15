@@ -3,6 +3,7 @@ import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
 import { News } from 'src/entity/news';
 import { BreakingNewsService } from './breaking-news.service';
 import { ExclusiveNewsService } from './exclusive-news.service';
+import { BreakingNewsType, ExclusiveNewsType, NODE_ENV } from '../common/type/naver';
 
 @Injectable()
 export default class NaverBatch {
@@ -13,8 +14,8 @@ export default class NaverBatch {
 
   // @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
-    if (process.env.NODE_ENV === 'production') {
-      const result = await this.breakingNewsService.getNaverNews('속보');
+    if (process.env.NODE_ENV === NODE_ENV) {
+      const result = await this.breakingNewsService.getNaverNews(BreakingNewsType);
       const breakingNews: Array<News> = await this.breakingNewsService.getBreakingNews(result.data);
       if (breakingNews.length > 0) await this.breakingNewsService.sendNaverNewsToSlack(breakingNews);
     }
@@ -22,8 +23,8 @@ export default class NaverBatch {
 
   // @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
-    if (process.env.NODE_ENV === 'production') {
-      const result = await this.exclusiveNewsService.getNaverNews('단독');
+    if (process.env.NODE_ENV === NODE_ENV) {
+      const result = await this.exclusiveNewsService.getNaverNews(ExclusiveNewsType);
       const exclusiveNews: Array<News> = await this.exclusiveNewsService.getExclusiveNews(result.data);
       if (exclusiveNews.length > 0) await this.exclusiveNewsService.sendNaverNewsToSlack(exclusiveNews);
     }
