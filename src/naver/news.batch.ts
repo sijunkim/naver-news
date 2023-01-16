@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { News } from 'src/entity/news';
 import { BreakingNewsService } from './breaking-news.service';
 import { ExclusiveNewsService } from './exclusive-news.service';
+import { NewsService } from './news.service';
 import { BreakingNewsType, ExclusiveNewsType, NODE_ENV } from '../common/type/naver';
 
 @Injectable()
@@ -10,6 +11,7 @@ export default class NaverBatch {
   constructor(
     private readonly breakingNewsService: BreakingNewsService,
     private readonly exclusiveNewsService: ExclusiveNewsService,
+    private readonly newsService: NewsService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
