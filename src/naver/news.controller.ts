@@ -1,22 +1,20 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
-import { BreakingNewsService } from './breaking-news.service';
-import { ExclusiveNewsService } from './exclusive-news.service';
+import { HttpResponse } from 'src/entity/httpResponse';
+import { NEWSTYPE } from 'src/common/type/naver';
+import { NewsService } from './news.service';
 
 @Controller('naver')
 export class NaverController {
-  constructor(
-    private readonly breakingNewsService: BreakingNewsService,
-    private readonly exclusiveNewsService: ExclusiveNewsService,
-  ) {}
+  constructor(private readonly newsService: NewsService) {}
 
   @Get('news/:keyword')
-  async getNaverNews(@Param('keyword') keyword: string): Promise<any> {
-    // return await this.breakingNewsService.getNaverNews(keyword);
+  async getNaverNews(@Param('keyword') newsType: NEWSTYPE): Promise<any> {
+    return await this.newsService.getNaverData(newsType);
   }
 
   @Post('news/bot/slack/:keyword')
-  async sendNaverNewsToSlack(@Param('keyword') keyword: string): Promise<any> {
-    // const result = await this.breakingNewsService.getNaverNews(keyword);
-    // return await this.breakingNewsService.sendNaverNewsToSlack(result.data);
+  async sendNaverNewsToSlack(@Param('keyword') newsType: NEWSTYPE): Promise<any> {
+    const result: HttpResponse = await this.newsService.getNaverData(newsType);
+    return await this.newsService.sendNaverNewsToSlack(result.data);
   }
 }

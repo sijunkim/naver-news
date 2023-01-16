@@ -8,7 +8,7 @@ import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
-import { BreakingNewsType, ExclusiveNewsType, NEWSTYPE } from '../common/type/naver';
+import { NEWSTYPE } from '../common/type/naver';
 
 @Injectable()
 export class NewsService {
@@ -19,11 +19,21 @@ export class NewsService {
     private readonly newsRefiner: NewsRefiner,
   ) {}
 
-  getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=30&start=1&sort=date`;
-    const url = `${this.naverconfig.openapi_url}${querystring}`;
+  async getNaverData(newsType: NEWSTYPE): Promise<HttpResponse | unknown> {
+    try {
+      const configuration: AxiosRequestConfig = this.getNaverApiConfiguration(newsType);
+      const response = await axios.get(configuration.url, { headers: configuration.headers });
+      const json = new XMLParser().parse(response.data);
+      return new HttpResponse(response.status, json.rss.channel.item, 'success');
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  getNaverApiConfiguration(newsType: NEWSTYPE): AxiosRequestConfig {
+    const querystring = `${encodeURI(newsType)}&display=30&start=1&sort=date`;
     return {
-      url: url,
+      url: `${this.naverconfig.openapi_url}${querystring}`,
       headers: {
         'X-Naver-Client-Id': this.naverconfig.client_id,
         'X-Naver-Client-Secret': this.naverconfig.client_secret,
@@ -40,17 +50,6 @@ export class NewsService {
     }
 
     return news;
-  }
-
-  async getNaverData(keyword: string): Promise<HttpResponse | unknown> {
-    try {
-      const configuration = this.getNaverApiConfiguration(keyword);
-      const response = await axios.get(configuration.url, { headers: configuration.headers });
-      const json = new XMLParser().parse(response.data);
-      return new HttpResponse(response.status, json.rss.channel.item, 'success');
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   async refineNews(news: News): Promise<any> {
