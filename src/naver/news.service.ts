@@ -42,22 +42,15 @@ export class NewsService {
     return news;
   }
 
-  async getNaverNews(keyword: string): Promise<HttpResponse> {
-    const result: HttpResponse = new HttpResponse();
-    const configuration = this.getNaverApiConfiguration(keyword);
-
+  async getNaverData(keyword: string): Promise<HttpResponse | unknown> {
     try {
-      const response = await axios.get(configuration.url, {
-        headers: configuration.headers,
-      });
-      result.status = response.status;
+      const configuration = this.getNaverApiConfiguration(keyword);
+      const response = await axios.get(configuration.url, { headers: configuration.headers });
       const json = new XMLParser().parse(response.data);
-      result.data = json.rss.channel.item;
-      result.message = 'success';
+      return new HttpResponse(response.status, json.rss.channel.item, 'success');
     } catch (error) {
       console.error(error);
     }
-    return result;
   }
 
   async refineNews(news: News): Promise<any> {

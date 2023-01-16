@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { News } from 'src/entity/news';
+import { HttpResponse } from 'src/entity/httpResponse';
 import { BreakingNewsService } from './breaking-news.service';
 import { ExclusiveNewsService } from './exclusive-news.service';
 import { NewsService } from './news.service';
@@ -17,18 +18,18 @@ export default class NaverBatch {
   @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
     if (process.env.NODE_ENV === NODE_ENV) {
-      const result = await this.breakingNewsService.getNaverNews(BreakingNewsType);
-      const breakingNews: Array<News> = await this.breakingNewsService.getBreakingNews(result.data);
-      if (breakingNews.length > 0) await this.breakingNewsService.sendNaverNewsToSlack(breakingNews);
+      const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
+      const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
+      if (news.length > 0) await this.breakingNewsService.sendNaverNewsToSlack(news);
     }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
     if (process.env.NODE_ENV === NODE_ENV) {
-      const result = await this.exclusiveNewsService.getNaverNews(ExclusiveNewsType);
-      const exclusiveNews: Array<News> = await this.exclusiveNewsService.getExclusiveNews(result.data);
-      if (exclusiveNews.length > 0) await this.exclusiveNewsService.sendNaverNewsToSlack(exclusiveNews);
+      const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
+      const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
+      if (news.length > 0) await this.exclusiveNewsService.sendNaverNewsToSlack(news);
     }
   }
 
