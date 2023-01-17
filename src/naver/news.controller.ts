@@ -15,6 +15,6 @@ export class NaverController {
   @Post('news/bot/slack/:keyword')
   async sendNaverNewsToSlack(@Param('keyword') newsType: NEWSTYPE): Promise<any> {
     const result: HttpResponse = await this.newsService.getNaverData(newsType);
-    return await this.newsService.sendNaverNewsToSlack(result.data);
+    return await this.newsService.sendNewsToSlack(result.data);
   }
 }

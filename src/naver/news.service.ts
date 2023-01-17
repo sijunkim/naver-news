@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
-import naverConfig from 'src/config/naverConfig';
+import NAVERCONFIG from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
@@ -13,8 +13,8 @@ import { NEWSTYPE } from '../common/type/naver';
 @Injectable()
 export class NewsService {
   constructor(
-    @Inject(naverConfig.KEY)
-    private naverconfig: ConfigType<typeof naverConfig>,
+    @Inject(NAVERCONFIG.KEY)
+    private naverConfig: ConfigType<typeof NAVERCONFIG>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
@@ -31,14 +31,11 @@ export class NewsService {
   }
 
   getNaverApiConfiguration(newsType: NEWSTYPE): AxiosRequestConfig {
-    const querystring = `${encodeURI(newsType)}&display=30&start=1&sort=date`;
-    return {
-      url: `${this.naverconfig.openapi_url}${querystring}`,
-      headers: {
-        'X-Naver-Client-Id': this.naverconfig.client_id,
-        'X-Naver-Client-Secret': this.naverconfig.client_secret,
-      },
-    };
+    const url = `${this.naverConfig.openapi_url}${encodeURI(newsType)}&display=30&start=1&sort=date`;
+    const clientId = this.naverConfig.client_id;
+    const clientSecret = this.naverConfig.client_secret;
+    const headers = { 'X-Naver-Client-Id': clientId, 'X-Naver-Client-Secret': clientSecret };
+    return { url: url, headers: headers };
   }
 
   async getNews(newsTYpe: NEWSTYPE, data: Array<News>) {
@@ -137,7 +134,7 @@ export class NewsService {
     await fs.appendFileSync('src/data/keyword/breakingKeyword.txt', rawKeywords, { encoding: 'utf8' });
   }
 
-  async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
+  async sendNewsToSlack(news: Array<News>): Promise<HttpResponse | unknown> {
     const firstItemPubDate: string = news[0].pubDate;
 
     for (const item of news.reverse()) {
