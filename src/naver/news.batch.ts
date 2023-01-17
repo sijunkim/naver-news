@@ -8,7 +8,7 @@ import { NewsService } from './news.service';
 import { BreakingNewsType, ExclusiveNewsType, NODE_ENV } from '../common/type/naver';
 
 @Injectable()
-export default class NaverBatch {
+export default class NewsBatch {
   constructor(
     private readonly breakingNewsService: BreakingNewsService,
     private readonly exclusiveNewsService: ExclusiveNewsService,
@@ -20,7 +20,7 @@ export default class NaverBatch {
     if (process.env.NODE_ENV === NODE_ENV) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
       const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
-      if (news.length > 0) await this.breakingNewsService.sendNaverNewsToSlack(news);
+      if (news.length > 0) await this.newsService.sendNewsToSlack(BreakingNewsType, news);
     }
   }
 

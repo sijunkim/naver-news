@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
-import NAVERCONFIG from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
@@ -9,12 +8,15 @@ import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
 import { NEWSTYPE } from '../common/type/naver';
+import * as configModule from '../config/configModule';
 
 @Injectable()
 export class NewsService {
   constructor(
-    @Inject(NAVERCONFIG.KEY)
-    private naverConfig: ConfigType<typeof NAVERCONFIG>,
+    @Inject(configModule.fileConfig.KEY)
+    private fileConfig: ConfigType<typeof configModule.fileConfig>,
+    @Inject(configModule.naverConfig.KEY)
+    private naverConfig: ConfigType<typeof configModule.naverConfig>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
@@ -31,17 +33,17 @@ export class NewsService {
   }
 
   getNaverApiConfiguration(newsType: NEWSTYPE): AxiosRequestConfig {
-    const url = `${this.naverConfig.openapi_url}${encodeURI(newsType)}&display=30&start=1&sort=date`;
-    const clientId = this.naverConfig.client_id;
-    const clientSecret = this.naverConfig.client_secret;
+    const url = `${this.naverConfig.openapiUrl}${encodeURI(newsType)}&display=30&start=1&sort=date`;
+    const clientId = this.naverConfig.clienId;
+    const clientSecret = this.naverConfig.clientSecret;
     const headers = { 'X-Naver-Client-Id': clientId, 'X-Naver-Client-Secret': clientSecret };
     return { url: url, headers: headers };
   }
 
-  async getNews(newsTYpe: NEWSTYPE, data: Array<News>) {
+  async getNews(newsType: NEWSTYPE, data: Array<News>) {
     const news: Array<News> = new Array<News>();
     for (const item of data) {
-      if (item.title.includes(newsTYpe)) {
+      if (item.title.includes(newsType)) {
         news.push(item);
       }
     }
@@ -134,7 +136,7 @@ export class NewsService {
     await fs.appendFileSync('src/data/keyword/breakingKeyword.txt', rawKeywords, { encoding: 'utf8' });
   }
 
-  async sendNewsToSlack(news: Array<News>): Promise<HttpResponse | unknown> {
+  async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
     const firstItemPubDate: string = news[0].pubDate;
 
     for (const item of news.reverse()) {
