@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import axios, { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
-import naverConfig from 'src/config/naverConfig';
+import NAVERCONFIG from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
-import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
@@ -13,20 +12,20 @@ import { ExclusiveNewsType } from '../common/type/naver';
 @Injectable()
 export class ExclusiveNewsService {
   constructor(
-    @Inject(naverConfig.KEY)
-    private naverconfig: ConfigType<typeof naverConfig>,
+    @Inject(NAVERCONFIG.KEY)
+    private naverConfig: ConfigType<typeof NAVERCONFIG>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
     const querystring = `${encodeURI(keyword)}&display=30&start=1&sort=date`;
-    const url = `${this.naverconfig.openapi_url}${querystring}`;
+    const url = `${this.naverConfig.openapiUrl}${querystring}`;
     return {
       url: url,
       headers: {
-        'X-Naver-Client-Id': this.naverconfig.client_id,
-        'X-Naver-Client-Secret': this.naverconfig.client_secret,
+        'X-Naver-Client-Id': this.naverConfig.clienId,
+        'X-Naver-Client-Secret': this.naverConfig.clientSecret,
       },
     };
   }
@@ -40,24 +39,6 @@ export class ExclusiveNewsService {
     }
 
     return exclusiveNews;
-  }
-
-  async getNaverNews(keyword: string): Promise<HttpResponse> {
-    const result: HttpResponse = new HttpResponse();
-    const configuration = this.getNaverApiConfiguration(keyword);
-
-    try {
-      const response = await axios.get(configuration.url, {
-        headers: configuration.headers,
-      });
-      result.status = response.status;
-      const json = new XMLParser().parse(response.data);
-      result.data = json.rss.channel.item;
-      result.message = 'success';
-    } catch (error) {
-      console.error(error);
-    }
-    return result;
   }
 
   async refineNews(news: News): Promise<any> {

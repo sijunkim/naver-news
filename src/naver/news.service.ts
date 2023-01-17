@@ -1,44 +1,54 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
-import NAVERCONFIG from 'src/config/naverConfig';
 import { HttpResponse } from 'src/entity/httpResponse';
+import { XMLParser } from 'fast-xml-parser';
 import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
-import { BreakingNewsType } from '../common/type/naver';
+import { NEWSTYPE } from '../common/type/naver';
+import * as configModule from '../config/configModule';
 
 @Injectable()
-export class BreakingNewsService {
+export class NewsService {
   constructor(
-    @Inject(NAVERCONFIG.KEY)
-    private naverConfig: ConfigType<typeof NAVERCONFIG>,
+    @Inject(configModule.fileConfig.KEY)
+    private fileConfig: ConfigType<typeof configModule.fileConfig>,
+    @Inject(configModule.naverConfig.KEY)
+    private naverConfig: ConfigType<typeof configModule.naverConfig>,
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
 
-  getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
-    const querystring = `${encodeURI(keyword)}&display=30&start=1&sort=date`;
-    const url = `${this.naverConfig.openapiUrl}${querystring}`;
-    return {
-      url: url,
-      headers: {
-        'X-Naver-Client-Id': this.naverConfig.clienId,
-        'X-Naver-Client-Secret': this.naverConfig.clientSecret,
-      },
-    };
+  async getNaverData(newsType: NEWSTYPE): Promise<HttpResponse | unknown> {
+    try {
+      const configuration: AxiosRequestConfig = this.getNaverApiConfiguration(newsType);
+      const response = await axios.get(configuration.url, { headers: configuration.headers });
+      const json = new XMLParser().parse(response.data);
+      return new HttpResponse(response.status, json.rss.channel.item, 'success');
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  async getBreakingNews(news: Array<News>) {
-    const breakingNews: Array<News> = new Array<News>();
-    for (const item of news) {
-      if (item.title.includes(BreakingNewsType)) {
-        breakingNews.push(item);
+  getNaverApiConfiguration(newsType: NEWSTYPE): AxiosRequestConfig {
+    const url = `${this.naverConfig.openapiUrl}${encodeURI(newsType)}&display=30&start=1&sort=date`;
+    const clientId = this.naverConfig.clienId;
+    const clientSecret = this.naverConfig.clientSecret;
+    const headers = { 'X-Naver-Client-Id': clientId, 'X-Naver-Client-Secret': clientSecret };
+    return { url: url, headers: headers };
+  }
+
+  async getNews(newsType: NEWSTYPE, data: Array<News>) {
+    const news: Array<News> = new Array<News>();
+    for (const item of data) {
+      if (item.title.includes(newsType)) {
+        news.push(item);
       }
     }
 
-    return breakingNews;
+    return news;
   }
 
   async refineNews(news: News): Promise<any> {
@@ -126,7 +136,7 @@ export class BreakingNewsService {
     await fs.appendFileSync('src/data/keyword/breakingKeyword.txt', rawKeywords, { encoding: 'utf8' });
   }
 
-  async sendNaverNewsToSlack(news: Array<News>): Promise<HttpResponse> {
+  async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
     const firstItemPubDate: string = news[0].pubDate;
 
     for (const item of news.reverse()) {
