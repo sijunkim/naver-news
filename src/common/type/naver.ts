@@ -16,7 +16,7 @@
 // };
 // export type NODE_ENV = Local | Production;
 
-type NEWSTYPE = '속보' | '단독';
+export type NEWSTYPE = '속보' | '단독';
 type NODE_ENV = 'local' | 'production';
 
 export const NODE_ENV: NODE_ENV = 'production';
