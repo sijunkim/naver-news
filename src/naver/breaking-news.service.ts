@@ -20,12 +20,12 @@ export class BreakingNewsService {
 
   getNaverApiConfiguration(keyword: string): AxiosRequestConfig {
     const querystring = `${encodeURI(keyword)}&display=30&start=1&sort=date`;
-    const url = `${this.naverConfig.openapi_url}${querystring}`;
+    const url = `${this.naverConfig.openapiUrl}${querystring}`;
     return {
       url: url,
       headers: {
-        'X-Naver-Client-Id': this.naverConfig.client_id,
-        'X-Naver-Client-Secret': this.naverConfig.client_secret,
+        'X-Naver-Client-Id': this.naverConfig.clienId,
+        'X-Naver-Client-Secret': this.naverConfig.clientSecret,
       },
     };
   }
