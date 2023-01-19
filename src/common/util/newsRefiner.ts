@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import newsCompany from 'src/data/raw/newsCompany';
+import { News } from 'src/entity/news';
+import { IncomingWebhookSendArguments } from '@slack/webhook';
 
 @Injectable()
 export default class NewsRefiner {
@@ -110,5 +112,42 @@ export default class NewsRefiner {
     }
 
     return -1;
+  }
+
+  getRefineNews(news: News): IncomingWebhookSendArguments {
+    const payloads: IncomingWebhookSendArguments = {
+      text: news.title,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*<${news.link}|${news.title}>*`,
+          },
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'plain_text',
+              text: `${news.pubDate} | ${news.company}`,
+            },
+          ],
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'plain_text',
+            text: `${news.description ?? '내용없음'}`,
+            emoji: true,
+          },
+        },
+        {
+          type: 'divider',
+        },
+      ],
+    };
+
+    return payloads;
   }
 }

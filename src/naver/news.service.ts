@@ -9,6 +9,7 @@ import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
 import { NEWSTYPE } from '../common/type/naver';
 import * as configModule from '../config/configModule';
+import { IncomingWebhookSendArguments } from '@slack/webhook';
 
 @Injectable()
 export class NewsService {
@@ -49,41 +50,6 @@ export class NewsService {
     }
 
     return news;
-  }
-
-  async refineNews(news: News): Promise<any> {
-    return {
-      text: news.title,
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*<${news.link}|${news.title}>*`,
-          },
-        },
-        {
-          type: 'context',
-          elements: [
-            {
-              type: 'plain_text',
-              text: `${news.pubDate} | ${news.company}`,
-            },
-          ],
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'plain_text',
-            text: `${news.description ?? '내용없음'}`,
-            emoji: true,
-          },
-        },
-        {
-          type: 'divider',
-        },
-      ],
-    };
   }
 
   async makeEmptyKeywordFile() {
@@ -142,18 +108,15 @@ export class NewsService {
     for (const item of news.reverse()) {
       if (await this.checkNewsJustified(item)) {
         try {
-          // 데이터 정제하는 부분
+          // 데이터 정제
           item.title = this.newsRefiner.htmlParsingToText(item.title);
           item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
           item.description = this.newsRefiner.htmlParsingToText(item.description);
           item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
-
-          // 메세지 폼 만드는 부분
-          const payload = await this.refineNews(item);
+          const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
           // 메세지 전송
           await this.slackWebhook.breakingNewsSend(payload);
-
           // 키워드 설정
           await this.setKeyword(item);
         } catch (error) {
