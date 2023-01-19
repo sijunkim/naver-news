@@ -27,6 +27,7 @@ export class NewsService {
       const configuration: AxiosRequestConfig = this.getNaverApiConfiguration(newsType);
       const response = await axios.get(configuration.url, { headers: configuration.headers });
       const json = new XMLParser().parse(response.data);
+
       return new HttpResponse(response.status, json.rss.channel.item, 'success');
     } catch (error) {
       console.error(error);
@@ -38,6 +39,7 @@ export class NewsService {
     const clientId = this.naverConfig.clienId;
     const clientSecret = this.naverConfig.clientSecret;
     const headers = { 'X-Naver-Client-Id': clientId, 'X-Naver-Client-Secret': clientSecret };
+
     return { url: url, headers: headers };
   }
 
