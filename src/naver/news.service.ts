@@ -7,7 +7,7 @@ import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
-import { NEWSTYPE } from '../common/type/naver';
+import { BreakingNewsType, DuplicationCount, NEWSTYPE } from '../common/type/naver';
 import * as configModule from '../config/configModule';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 
@@ -54,27 +54,48 @@ export class NewsService {
     return news;
   }
 
-  async makeEmptyKeywordFile() {
-    await fs.writeFileSync('src/data/keyword/breakingKeyword.txt', '');
+  async setKeywordFileToEmpty(newsType: NEWSTYPE) {
+    const filePath: string = this.getKeywordFilePath(newsType);
+    await fs.writeFileSync(filePath, '');
   }
 
-  async setLastReceivedTime(firstItemPubDate: string) {
-    await fs.writeFileSync('src/data/time/breakingLastReceivedTime.txt', firstItemPubDate);
+  getKeywordFilePath(newsType: NEWSTYPE): string {
+    const breakingKeywordFile: string = this.fileConfig.breakingKeyword;
+    const exclusiveKeywordFile: string = this.fileConfig.exclusiveKeyword;
+    const filePath: string = newsType == BreakingNewsType ? breakingKeywordFile : exclusiveKeywordFile;
+
+    return filePath;
   }
 
-  async getLastReceivedTime() {
-    return await fs.readFileSync('src/data/time/breakingLastReceivedTime.txt', { encoding: 'utf8' });
+  getLastReceivedTimeFilePath(newsType: NEWSTYPE): string {
+    const breakingLastTimeFIle: string = this.fileConfig.breakingLastReceivedTime;
+    const exclusiveLastTimeFIle: string = this.fileConfig.exclusiveLastReceivedTime;
+    const filePath: string = newsType == BreakingNewsType ? breakingLastTimeFIle : exclusiveLastTimeFIle;
+
+    return filePath;
   }
 
-  async checkNewsPubDate(news: News): Promise<boolean> {
-    const lastReceivedTime = await this.getLastReceivedTime();
+  async setLastReceivedTime(newsType: NEWSTYPE, firstItemPubDate: string) {
+    const filePath: string = this.getLastReceivedTimeFilePath(newsType);
+
+    await fs.writeFileSync(filePath, firstItemPubDate);
+  }
+
+  async getLastReceivedTime(newsType: NEWSTYPE) {
+    const filePath: string = this.getLastReceivedTimeFilePath(newsType);
+
+    return await fs.readFileSync(filePath, { encoding: 'utf8' });
+  }
+
+  async checkNewsPubDate(newsType: NEWSTYPE, news: News): Promise<boolean> {
+    const lastReceivedTime = await this.getLastReceivedTime(newsType);
 
     return new Date(lastReceivedTime) < new Date(news.pubDate);
   }
 
-  async checkNewsKeyword(news: News): Promise<boolean> {
+  async checkNewsKeyword(newsType: NEWSTYPE, news: News): Promise<boolean> {
     let containCount = 0;
-    const rawKeywords = await fs.readFileSync('src/data/keyword/breakingKeyword.txt', { encoding: 'utf8' });
+    const rawKeywords = await this.getRawKeywords(newsType);
     const keywords: string[] = rawKeywords.split(',');
     const title = news.title.replace(' ', '');
     for (const keyword of keywords) {
@@ -82,33 +103,40 @@ export class NewsService {
     }
 
     // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
-    return containCount >= 3 ? false : true;
+    return containCount >= DuplicationCount ? false : true;
   }
 
-  async checkNewsJustified(news: News): Promise<boolean> {
-    const pubDateStatus: boolean = await this.checkNewsPubDate(news);
-    const keywordStatus: boolean = await this.checkNewsKeyword(news);
+  async checkNewsJustified(newsType: NEWSTYPE, news: News): Promise<boolean> {
+    const pubDateStatus: boolean = await this.checkNewsPubDate(newsType, news);
+    const keywordStatus: boolean = await this.checkNewsKeyword(newsType, news);
 
     return pubDateStatus && keywordStatus;
   }
 
-  async setKeyword(news: News) {
-    const savedRawKeywords = await fs.readFileSync('src/data/keyword/breakingKeyword.txt', { encoding: 'utf8' });
+  async getRawKeywords(newsType: NEWSTYPE): Promise<string> {
+    const filePath: string = this.getKeywordFilePath(newsType);
+    const rawKeywords = await fs.readFileSync(filePath, { encoding: 'utf8' });
+
+    return rawKeywords;
+  }
+
+  async setKeywords(newsType: NEWSTYPE, news: News) {
+    const filePath: string = this.getKeywordFilePath(newsType);
+    const savedRawKeywords = await fs.readFileSync(filePath, { encoding: 'utf8' });
     let rawKeywords = '';
-    for (const keyword of news.title.split(' ')) {
+    news.title.split(' ').forEach((keyword) => {
       if (savedRawKeywords.includes(keyword) == false) {
         rawKeywords += `${keyword},`;
       }
-    }
-
-    await fs.appendFileSync('src/data/keyword/breakingKeyword.txt', rawKeywords, { encoding: 'utf8' });
+    });
+    await fs.appendFileSync(filePath, rawKeywords, { encoding: 'utf8' });
   }
 
   async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
     const firstItemPubDate: string = news[0].pubDate;
 
     for (const item of news.reverse()) {
-      if (await this.checkNewsJustified(item)) {
+      if (await this.checkNewsJustified(newsType, item)) {
         try {
           // 데이터 정제
           item.title = this.newsRefiner.htmlParsingToText(item.title);
@@ -118,16 +146,16 @@ export class NewsService {
           const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
           // 메세지 전송
-          await this.slackWebhook.breakingNewsSend(payload);
+          await this.slackWebhook.newsSend(newsType, payload);
           // 키워드 설정
-          await this.setKeyword(item);
+          await this.setKeywords(newsType, item);
         } catch (error) {
           console.error(error);
         }
       }
     }
 
-    await this.setLastReceivedTime(firstItemPubDate);
+    await this.setLastReceivedTime(newsType, firstItemPubDate);
 
     console.log(`${new Date()}->breakingNewsCron`);
 
