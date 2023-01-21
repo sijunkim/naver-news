@@ -16,6 +16,8 @@
 // };
 // export type NODE_ENV = Local | Production;
 
+export const DuplicationCount = 3;
+
 export type NEWSTYPE = '속보' | '단독';
 type NODE_ENV = 'local' | 'production';
 
