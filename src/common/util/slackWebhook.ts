@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+import { IncomingWebhookSendArguments } from '@slack/webhook';
 import { IncomingWebhook } from '@slack/webhook';
 import SLACKCONFIG from 'src/config/slackConfig';
+import { BreakingNewsType, NEWSTYPE } from '../type/naver';
 
 @Injectable()
 export default class SlackWebhook {
@@ -10,23 +12,17 @@ export default class SlackWebhook {
     private slackConfig: ConfigType<typeof SLACKCONFIG>,
   ) {}
 
-  async breakingNewsSend(payload: any) {
+  async newsSend(newsType: NEWSTYPE, payloads: IncomingWebhookSendArguments) {
+    const breakingNewsWebhookUrl: string = this.slackConfig.breakingNewsWebhookUrl;
+    const exclusiveNewsWebhookUrl: string = this.slackConfig.exclusiveNewsWebhookUrl;
+    const url: string = newsType == BreakingNewsType ? breakingNewsWebhookUrl : exclusiveNewsWebhookUrl;
+
     // NEWSBOT
-    let webhook = new IncomingWebhook(this.slackConfig.breakingNewsWebhookUrl);
-    await webhook.send(payload);
+    let webhook = new IncomingWebhook(url);
+    await webhook.send(payloads);
 
     // CHAINPARTNERS
     webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
-    await webhook.send(payload);
-  }
-
-  async exclusiveNewsSend(payload: any) {
-    // NEWSBOT
-    let webhook = new IncomingWebhook(this.slackConfig.exclusiveNewsWebhookUrl);
-    await webhook.send(payload);
-
-    // CHAINPARTNERS
-    webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
-    await webhook.send(payload);
+    await webhook.send(payloads);
   }
 }
