@@ -13,7 +13,7 @@ export default class SlackWebhook {
   ) {}
 
   async newsSend(newsType: NEWSTYPE, payloads: IncomingWebhookSendArguments) {
-    let webhook = new IncomingWebhook(undefined);
+    let webhook: IncomingWebhook = undefined;
 
     // // NEWSBOT
     // const breakingNewsWebhookUrl: string = this.slackConfig.breakingNewsWebhookUrl;
