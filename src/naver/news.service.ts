@@ -94,16 +94,11 @@ export class NewsService {
   }
 
   async checkNewsKeyword(newsType: NEWSTYPE, news: News): Promise<boolean> {
-    let containCount = 0;
     const rawKeywords = await this.getRawKeywords(newsType);
     const keywords: string[] = rawKeywords.split(',');
-    const title = news.title.replace(' ', '');
-    for (const keyword of keywords) {
-      if (title.includes(keyword)) containCount++;
-    }
 
-    // 중복되는 키워드가 5개 이상일 경우 메세지를 발송하지 않도록 설정
-    return containCount >= DuplicationCount ? false : true;
+    // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
+    return keywords.filter((keyword) => news.title.replace(' ', '').includes(keyword)).length < DuplicationCount;
   }
 
   async checkNewsJustified(newsType: NEWSTYPE, news: News): Promise<boolean> {
@@ -132,32 +127,37 @@ export class NewsService {
     await fs.appendFileSync(filePath, rawKeywords, { encoding: 'utf8' });
   }
 
+  async getJustifiedNews(newsType: NEWSTYPE, news: Array<News>): Promise<Array<News>> {
+    const justifiedNews: Array<News> = news
+      .filter(async (item) => (await this.checkNewsJustified(newsType, item)) === true)
+      .map((item) => item)
+      .reverse();
+
+    return justifiedNews;
+  }
+
   async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
-    const firstItemPubDate: string = news[0].pubDate;
+    for (const item of news) {
+      try {
+        // 데이터 정제
+        item.title = this.newsRefiner.htmlParsingToText(item.title);
+        item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
+        item.description = this.newsRefiner.htmlParsingToText(item.description);
+        item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
+        const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
-    for (const item of news.reverse()) {
-      if (await this.checkNewsJustified(newsType, item)) {
-        try {
-          // 데이터 정제
-          item.title = this.newsRefiner.htmlParsingToText(item.title);
-          item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
-          item.description = this.newsRefiner.htmlParsingToText(item.description);
-          item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
-          const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
-
-          // 메세지 전송
-          await this.slackWebhook.newsSend(newsType, payload);
-          // 키워드 설정
-          await this.setKeywords(newsType, item);
-        } catch (error) {
-          console.error(error);
-        }
+        // 메세지 전송
+        await this.slackWebhook.newsSend(newsType, payload);
+        // 키워드 설정
+        await this.setKeywords(newsType, item);
+      } catch (error) {
+        console.error(error);
       }
     }
 
-    await this.setLastReceivedTime(newsType, firstItemPubDate);
+    await this.setLastReceivedTime(newsType, news[0].pubDate);
 
-    console.log(`${new Date()}->breakingNewsCron`);
+    console.log(`${new Date()}->${newsType}`);
 
     return {
       status: 200,
