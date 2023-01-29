@@ -13,16 +13,21 @@ export default class SlackWebhook {
   ) {}
 
   async newsSend(newsType: NEWSTYPE, payloads: IncomingWebhookSendArguments) {
-    const breakingNewsWebhookUrl: string = this.slackConfig.breakingNewsWebhookUrl;
-    const exclusiveNewsWebhookUrl: string = this.slackConfig.exclusiveNewsWebhookUrl;
-    const url: string = newsType == BreakingNewsType ? breakingNewsWebhookUrl : exclusiveNewsWebhookUrl;
+    let webhook: IncomingWebhook = undefined;
 
-    // NEWSBOT
-    let webhook = new IncomingWebhook(url);
-    await webhook.send(payloads);
+    // // NEWSBOT
+    // const breakingNewsWebhookUrl: string = this.slackConfig.breakingNewsWebhookUrl;
+    // const exclusiveNewsWebhookUrl: string = this.slackConfig.exclusiveNewsWebhookUrl;
+    // const url: string = newsType == BreakingNewsType ? breakingNewsWebhookUrl : exclusiveNewsWebhookUrl;
+    // webhook = new IncomingWebhook(url);
+    // await webhook.send(payloads);
 
-    // CHAINPARTNERS
-    webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
+    // // CHAINPARTNERS
+    // webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
+    // await webhook.send(payloads);
+
+    // TEST
+    webhook = new IncomingWebhook(this.slackConfig.developWebhookUrl);
     await webhook.send(payloads);
   }
 }
