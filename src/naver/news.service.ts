@@ -68,9 +68,9 @@ export class NewsService {
   }
 
   getLastReceivedTimeFilePath(newsType: NEWSTYPE): string {
-    const breakingLastTimeFIle: string = this.fileConfig.breakingLastReceivedTime;
-    const exclusiveLastTimeFIle: string = this.fileConfig.exclusiveLastReceivedTime;
-    const filePath: string = newsType == BreakingNewsType ? breakingLastTimeFIle : exclusiveLastTimeFIle;
+    const breakingLastTimeFile: string = this.fileConfig.breakingLastReceivedTime;
+    const exclusiveLastTimeFile: string = this.fileConfig.exclusiveLastReceivedTime;
+    const filePath: string = newsType == BreakingNewsType ? breakingLastTimeFile : exclusiveLastTimeFile;
 
     return filePath;
   }
@@ -87,6 +87,14 @@ export class NewsService {
     return await fs.readFileSync(filePath, { encoding: 'utf8' });
   }
 
+  getExceptKeywordFilePath(newsType: NEWSTYPE): string {
+    const breakingExceptKeywordFile: string = this.fileConfig.breakingExceptKeyword;
+    const exclusiveExceptKeywordFile: string = this.fileConfig.exclusiveExceptKeyword;
+    const filePath: string = newsType == BreakingNewsType ? breakingExceptKeywordFile : exclusiveExceptKeywordFile;
+
+    return filePath;
+  }
+
   async checkNewsPubDate(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const lastReceivedTime = await this.getLastReceivedTime(newsType);
 
@@ -101,15 +109,33 @@ export class NewsService {
     return keywords.filter((keyword) => news.title.replace(' ', '').includes(keyword)).length < DuplicationCount;
   }
 
+  async checkNewsExcept(newsType: NEWSTYPE, news: News): Promise<boolean> {
+    const rawKeywords = await this.getRawExceptKeywords(newsType);
+    const keywords: string[] = rawKeywords.split(',');
+    const title = news.title.replaceAll(' ', '');
+    for (const keyword of keywords) {
+      if (title.includes(keyword)) return false;
+    }
+    return true;
+  }
+
   async checkNewsJustified(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const pubDateStatus: boolean = await this.checkNewsPubDate(newsType, news);
     const keywordStatus: boolean = await this.checkNewsKeyword(newsType, news);
+    const exceptStatus: boolean = await this.checkNewsExcept(newsType, news);
 
-    return pubDateStatus && keywordStatus;
+    return pubDateStatus && keywordStatus && exceptStatus;
   }
 
   async getRawKeywords(newsType: NEWSTYPE): Promise<string> {
     const filePath: string = this.getKeywordFilePath(newsType);
+    const rawKeywords = await fs.readFileSync(filePath, { encoding: 'utf8' });
+
+    return rawKeywords;
+  }
+
+  async getRawExceptKeywords(newsType: NEWSTYPE): Promise<string> {
+    const filePath: string = this.getExceptKeywordFilePath(newsType);
     const rawKeywords = await fs.readFileSync(filePath, { encoding: 'utf8' });
 
     return rawKeywords;
