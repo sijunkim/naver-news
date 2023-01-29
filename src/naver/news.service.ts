@@ -7,7 +7,7 @@ import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
-import { BreakingNewsType, DuplicationCount, NEWSTYPE } from '../common/type/naver';
+import { BreakingNewsType, DuplicationCount, ExclusiveNewsType, NEWSTYPE } from '../common/type/naver';
 import * as configModule from '../config/configModule';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
 
@@ -56,6 +56,7 @@ export class NewsService {
 
   async setKeywordFileToEmpty(newsType: NEWSTYPE) {
     const filePath: string = this.getKeywordFilePath(newsType);
+
     await fs.writeFileSync(filePath, '');
   }
 
@@ -81,6 +82,12 @@ export class NewsService {
     await fs.writeFileSync(filePath, firstItemPubDate);
   }
 
+  async setLastReceivedTimeFileToEmpty(newsType: NEWSTYPE) {
+    const filePath: string = this.getLastReceivedTimeFilePath(newsType);
+
+    await fs.writeFileSync(filePath, '');
+  }
+
   async getLastReceivedTime(newsType: NEWSTYPE) {
     const filePath: string = this.getLastReceivedTimeFilePath(newsType);
 
@@ -98,19 +105,29 @@ export class NewsService {
   async checkNewsPubDate(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const lastReceivedTime = await this.getLastReceivedTime(newsType);
 
-    return new Date(lastReceivedTime) < new Date(news.pubDate);
+    return lastReceivedTime === '' || new Date(lastReceivedTime) < new Date(news.pubDate);
   }
 
   async checkNewsKeyword(newsType: NEWSTYPE, news: News): Promise<boolean> {
+    let count = 0;
     const rawKeywords = await this.getRawKeywords(newsType);
     const keywords: string[] = rawKeywords.split(',');
+    for (const keyword of keywords) {
+      // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
+      if (count > 3) return false;
 
-    // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
-    return keywords.filter((keyword) => news.title.replace(' ', '').includes(keyword)).length < DuplicationCount;
+      if (news.title.replace(' ', '').includes(keyword)) {
+        count++;
+      }
+    }
+
+    return true;
   }
 
   async checkNewsExcept(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const rawKeywords = await this.getRawExceptKeywords(newsType);
+    if (rawKeywords === '') return true;
+
     const keywords: string[] = rawKeywords.split(',');
     const title = news.title.replaceAll(' ', '');
     for (const keyword of keywords) {
@@ -154,15 +171,18 @@ export class NewsService {
   }
 
   async getJustifiedNews(newsType: NEWSTYPE, news: Array<News>): Promise<Array<News>> {
-    const justifiedNews: Array<News> = news
-      .filter(async (item) => (await this.checkNewsJustified(newsType, item)) === true)
-      .map((item) => item)
-      .reverse();
+    const justifiedNews: Array<News> = new Array<News>();
+    for (const item of news.reverse()) {
+      const result = await this.checkNewsJustified(newsType, item);
+      if (result) justifiedNews.push(item);
+    }
 
     return justifiedNews;
   }
 
   async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
+    const firstItemPubDate = news[news.length - 1].pubDate;
+
     for (const item of news) {
       try {
         // 데이터 정제
@@ -181,9 +201,39 @@ export class NewsService {
       }
     }
 
-    await this.setLastReceivedTime(newsType, news[0].pubDate);
+    await this.setLastReceivedTime(newsType, firstItemPubDate);
 
     console.log(`${new Date()}->${newsType}`);
+
+    return {
+      status: 200,
+      message: 'success',
+      data: '',
+    };
+  }
+
+  async resetNaverNewsKeyword() {
+    await this.setKeywordFileToEmpty(BreakingNewsType);
+    await this.setKeywordFileToEmpty(ExclusiveNewsType);
+  }
+
+  async resetNaverNewsTime() {
+    await this.setLastReceivedTimeFileToEmpty(BreakingNewsType);
+    await this.setLastReceivedTimeFileToEmpty(ExclusiveNewsType);
+  }
+
+  async deleteNaverNewsKeyword(): Promise<HttpResponse | unknown> {
+    await this.resetNaverNewsKeyword();
+
+    return {
+      status: 200,
+      message: 'success',
+      data: '',
+    };
+  }
+
+  async deleteNaverNewsTime(): Promise<HttpResponse | unknown> {
+    await this.resetNaverNewsTime();
 
     return {
       status: 200,
