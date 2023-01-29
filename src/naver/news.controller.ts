@@ -19,25 +19,25 @@ export class NaverController {
     return await this.newsService.sendNewsToSlack(newsType, result.data);
   }
 
-  // @Delete('news/data')
-  // async resetNaverNewsData(): Promise<boolean | unknown> {
-  //   const keywordResult: HttpResponse = await this.newsService.deleteNaverNewsKeyword();
-  //   const timeResult: HttpResponse = await this.newsService.deleteNaverNewsTime();
+  @Delete('news/data')
+  async resetNaverNewsData(): Promise<boolean | unknown> {
+    const keywordResult: HttpResponse = await this.newsService.deleteNaverNewsKeyword();
+    const timeResult: HttpResponse = await this.newsService.deleteNaverNewsTime();
 
-  //   return keywordResult.status === 200 && timeResult.status === 200 ? true : false;
-  // }
+    return keywordResult.status === 200 && timeResult.status === 200 ? true : false;
+  }
 
-  // @Delete('news/keyword')
-  // async deleteNaverNewsKeyword(): Promise<HttpResponse> {
-  //   const result: HttpResponse = await this.newsService.deleteNaverNewsKeyword();
+  @Delete('news/keyword')
+  async deleteNaverNewsKeyword(): Promise<HttpResponse> {
+    const result: HttpResponse = await this.newsService.deleteNaverNewsKeyword();
 
-  //   return result;
-  // }
+    return result;
+  }
 
-  // @Delete('news/time')
-  // async deleteNaverNewsTime(): Promise<HttpResponse> {
-  //   const result: HttpResponse = await this.newsService.deleteNaverNewsTime();
+  @Delete('news/time')
+  async deleteNaverNewsTime(): Promise<HttpResponse> {
+    const result: HttpResponse = await this.newsService.deleteNaverNewsTime();
 
-  //   return result;
-  // }
+    return result;
+  }
 }
