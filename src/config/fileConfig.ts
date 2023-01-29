@@ -5,4 +5,6 @@ export default registerAs('file', () => ({
   exclusiveKeyword: process.env.EXCLUSIVE_KEYWORD,
   breakingLastReceivedTime: process.env.BREAKING_LAST_RECEIVED_TIME,
   exclusiveLastReceivedTime: process.env.EXCLUSIVE_LAST_RECEIVED_TIME,
+  breakingExceptKeyword: process.env.BREAKING_EXCEPT_KEYWORD,
+  exclusiveExceptKeyword: process.env.EXCLUSIVE_EXCEPT_KEYWORD,
 }));

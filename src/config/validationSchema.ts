@@ -9,6 +9,7 @@ export const validationSchema = Joi.object({
   BREAKING_LAST_RECEIVED_TIME: Joi.string().required(),
   EXCLUSIVE_KEYWORD: Joi.string().required(),
   EXCLUSIVE_LAST_RECEIVED_TIME: Joi.string().required(),
+  EXCLUSIVE_EXCEPT_KEYWORD: Joi.string().required(),
 
   BREAKING_NEWS_WEBHOOK_URL: Joi.string().required(),
   EXCLUSIVE_NEWS_WEBHOOK_URL: Joi.string().required(),
