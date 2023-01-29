@@ -14,22 +14,23 @@ export default class NewsBatch {
     if (true || process.env.NODE_ENV === NODE_ENV) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
       const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
-      if (news.length > 0) await this.newsService.sendNewsToSlack(BreakingNewsType, news);
+      const justifiedNews = await this.newsService.getJustifiedNews(BreakingNewsType, news);
+      if (justifiedNews.length > 0) await this.newsService.sendNewsToSlack(BreakingNewsType, justifiedNews);
     }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
-    if (true || process.env.NODE_ENV === NODE_ENV) {
+    if (process.env.NODE_ENV === NODE_ENV) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
-      if (news.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, news);
+      const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
+      if (news.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, justifiedNews);
     }
   }
 
   @Cron(CronExpression.EVERY_2_HOURS)
   async makeKeywordFilesCron() {
-    await this.newsService.setKeywordFileToEmpty(BreakingNewsType);
-    await this.newsService.setKeywordFileToEmpty(ExclusiveNewsType);
+    await this.newsService.resetNaverNewsKeyword();
   }
 }
