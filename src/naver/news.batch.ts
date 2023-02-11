@@ -11,7 +11,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
-    if (true || process.env.NODE_ENV === NODE_ENV) {
+    if (process.env.NODE_ENV === NODE_ENV) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
       const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(BreakingNewsType, news);

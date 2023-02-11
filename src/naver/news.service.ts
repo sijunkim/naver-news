@@ -7,9 +7,10 @@ import { News } from 'src/entity/news';
 import SlackWebhook from 'src/common/util/slackWebhook';
 import NewsRefiner from 'src/common/util/newsRefiner';
 import * as fs from 'fs';
-import { BreakingNewsType, DuplicationCount, ExclusiveNewsType, NEWSTYPE } from '../common/type/naver';
+import { BreakingNewsType, ExclusiveNewsType, NEWSTYPE } from '../common/type/naver';
 import * as configModule from '../config/configModule';
 import { IncomingWebhookSendArguments } from '@slack/webhook';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class NewsService {
@@ -102,6 +103,10 @@ export class NewsService {
     return filePath;
   }
 
+  getExceptCompanyFilePath(): string {
+    return this.fileConfig.exceptCompany;
+  }
+
   async checkNewsPubDate(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const lastReceivedTime = await this.getLastReceivedTime(newsType);
 
@@ -136,12 +141,25 @@ export class NewsService {
     return true;
   }
 
+  async checkNewsCompany(newsType: NEWSTYPE, news: News): Promise<boolean> {
+    const rawCompanies = await this.getRawExceptCompanies();
+    if (rawCompanies === '') return true;
+
+    const companies: string[] = rawCompanies.split(',');
+    const companyLink = news.originallink;
+    for (const company of companies) {
+      if (company.includes(companyLink)) return false;
+    }
+    return true;
+  }
+
   async checkNewsJustified(newsType: NEWSTYPE, news: News): Promise<boolean> {
     const pubDateStatus: boolean = await this.checkNewsPubDate(newsType, news);
     const keywordStatus: boolean = await this.checkNewsKeyword(newsType, news);
     const exceptStatus: boolean = await this.checkNewsExcept(newsType, news);
+    const companyStatus: boolean = await this.checkNewsCompany(newsType, news);
 
-    return pubDateStatus && keywordStatus && exceptStatus;
+    return pubDateStatus && keywordStatus && exceptStatus && companyStatus;
   }
 
   async getRawKeywords(newsType: NEWSTYPE): Promise<string> {
@@ -156,6 +174,13 @@ export class NewsService {
     const rawKeywords = await fs.readFileSync(filePath, { encoding: 'utf8' });
 
     return rawKeywords;
+  }
+
+  async getRawExceptCompanies(): Promise<string> {
+    const filePath: string = this.getExceptCompanyFilePath();
+    const rawCompanies = await fs.readFileSync(filePath, { encoding: 'utf8' });
+
+    return rawCompanies;
   }
 
   async setKeywords(newsType: NEWSTYPE, news: News) {
@@ -198,12 +223,11 @@ export class NewsService {
         await this.setKeywords(newsType, item);
       } catch (error) {
         console.error(error);
+        console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} error`);
       }
     }
-
     await this.setLastReceivedTime(newsType, firstItemPubDate);
-
-    console.log(`${new Date()}->${newsType}`);
+    console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} success`);
 
     return {
       status: 200,

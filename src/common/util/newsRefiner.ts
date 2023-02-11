@@ -138,7 +138,7 @@ export default class NewsRefiner {
           type: 'section',
           text: {
             type: 'plain_text',
-            text: `${news.description ?? '내용없음'}`,
+            text: `${news.description || '내용없음'}`,
             emoji: true,
           },
         },
