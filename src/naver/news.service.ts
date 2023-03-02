@@ -206,27 +206,29 @@ export class NewsService {
   }
 
   async sendNewsToSlack(newsType: NEWSTYPE, news: Array<News>): Promise<HttpResponse | unknown> {
-    const firstItemPubDate = news[news.length - 1].pubDate;
+    if (news.length > 0) {
+      const firstItemPubDate = news[news.length - 1].pubDate;
 
-    for (const item of news) {
-      try {
-        // 데이터 정제
-        item.title = this.newsRefiner.htmlParsingToText(item.title);
-        item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
-        item.description = this.newsRefiner.htmlParsingToText(item.description);
-        item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
-        const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
+      for (const item of news) {
+        try {
+          // 데이터 정제
+          item.title = this.newsRefiner.htmlParsingToText(item.title);
+          item.pubDate = this.newsRefiner.pubDateToKoreaTime(item.pubDate);
+          item.description = this.newsRefiner.htmlParsingToText(item.description);
+          item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
+          const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
-        // 메세지 전송
-        await this.slackWebhook.newsSend(newsType, payload);
-        // 키워드 설정
-        await this.setKeywords(newsType, item);
-      } catch (error) {
-        console.error(error);
-        console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} error`);
+          // 메세지 전송
+          await this.slackWebhook.newsSend(newsType, payload);
+          // 키워드 설정
+          await this.setKeywords(newsType, item);
+        } catch (error) {
+          console.error(error);
+          console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} error`);
+        }
       }
+      await this.setLastReceivedTime(newsType, firstItemPubDate);
     }
-    await this.setLastReceivedTime(newsType, firstItemPubDate);
     console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} success`);
 
     return {

@@ -19,8 +19,9 @@
 export const DuplicationCount = 3;
 
 export type NEWSTYPE = '속보' | '단독';
-type NODE_ENV = 'local' | 'production';
+type NODE_ENV = 'local' | 'debug' | 'production';
 
-export const NODE_ENV: NODE_ENV = 'production';
+export const DEBUG: NODE_ENV = 'debug';
+export const PRODUCTION: NODE_ENV = 'production';
 export const BreakingNewsType: NEWSTYPE = '속보';
 export const ExclusiveNewsType: NEWSTYPE = '단독';

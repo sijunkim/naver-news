@@ -6,7 +6,8 @@
       "command": "yarn start:debug",
       "name": "Debug",
       "request": "launch",
-      "type": "node-terminal"
+      "type": "node-terminal",
+      "env": { "NODE_ENV": "debug" }
     }
   ]
 }

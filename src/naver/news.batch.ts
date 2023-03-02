@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { News } from 'src/entity/news';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { NewsService } from './news.service';
-import { BreakingNewsType, ExclusiveNewsType, NODE_ENV } from '../common/type/naver';
+import { BreakingNewsType, ExclusiveNewsType, DEBUG, PRODUCTION } from '../common/type/naver';
 
 @Injectable()
 export default class NewsBatch {
@@ -11,7 +11,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
-    if (process.env.NODE_ENV === NODE_ENV) {
+    if (process.env.NODE_ENV == DEBUG || process.env.NODE_ENV == PRODUCTION) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
       const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(BreakingNewsType, news);
@@ -21,7 +21,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
-    if (process.env.NODE_ENV === NODE_ENV) {
+    if (process.env.NODE_ENV == DEBUG || process.env.NODE_ENV == PRODUCTION) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
