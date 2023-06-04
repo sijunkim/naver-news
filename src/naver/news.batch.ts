@@ -4,6 +4,7 @@ import { News } from 'src/entity/news';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { NewsService } from './news.service';
 import { BreakingNewsType, ExclusiveNewsType, DEBUG, PRODUCTION } from '../common/type/naver';
+import UtilService from 'src/common/service/utilService';
 
 @Injectable()
 export default class NewsBatch {
@@ -11,7 +12,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
-    if (process.env.NODE_ENV == DEBUG || process.env.NODE_ENV == PRODUCTION) {
+    if (UtilService.isProduction()) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
       const news: Array<News> = await this.newsService.getNews(BreakingNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(BreakingNewsType, news);
@@ -21,7 +22,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
-    if (process.env.NODE_ENV == DEBUG || process.env.NODE_ENV == PRODUCTION) {
+    if (UtilService.isProduction()) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
@@ -31,6 +32,8 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_2_HOURS)
   async makeKeywordFilesCron() {
-    await this.newsService.resetNaverNewsKeyword();
+    if (UtilService.isProduction()) {
+      await this.newsService.resetNaverNewsKeyword();
+    }
   }
 }
