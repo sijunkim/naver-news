@@ -10,6 +10,7 @@ import NewsRefiner from './common/util/newsRefiner';
 import NewsBatch from './naver/news.batch';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NewsService } from './naver/news.service';
+import UtilService from './common/service/utilService';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { NewsService } from './naver/news.service';
     ScheduleModule.forRoot(),
   ],
   controllers: [AppController, NaverController],
-  providers: [AppService, NewsService, NewsBatch, SlackWebhook, NewsRefiner],
+  providers: [AppService, NewsService, NewsBatch, SlackWebhook, NewsRefiner, UtilService],
 })
 export class AppModule {}

@@ -13,6 +13,6 @@ export const validationSchema = Joi.object({
 
   BREAKING_NEWS_WEBHOOK_URL: Joi.string().required(),
   EXCLUSIVE_NEWS_WEBHOOK_URL: Joi.string().required(),
-  CHAINPARTNERS_WEBHOOK_URL: Joi.string().required(),
-  DEVELOP_WEBHOOK_URL: Joi.string().required(),
+  CHAINPARTNERS_WEBHOOK_URL: Joi.string(),
+  DEVELOP_WEBHOOK_URL: Joi.string(),
 });
