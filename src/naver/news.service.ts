@@ -115,13 +115,18 @@ export class NewsService {
 
   async checkNewsKeyword(newsType: NEWSTYPE, news: News): Promise<boolean> {
     let count = 0;
+    const duplicationKeywords = [];
     const rawKeywords = await this.getRawKeywords(newsType);
-    const keywords: string[] = rawKeywords.split(',');
+    const keywords: string[] = rawKeywords.split(',').filter((keyword) => keyword != '');
     for (const keyword of keywords) {
       // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
-      if (count > 3) return false;
+      if (count > 3) {
+        console.log(`${'중복 키워드 : '}${duplicationKeywords}`);
+        return false;
+      }
 
       if (news.title.replace(' ', '').includes(keyword)) {
+        duplicationKeywords.push(keyword);
         count++;
       }
     }
