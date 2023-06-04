@@ -29,20 +29,20 @@
 ## Installation
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ## Running the app
 
 ```bash
-# development
-$ npm run start
+# develop mode
+$ yarn start:dev
 
-# watch mode
-$ npm run start:dev
+# debug mode
+$ yarn start:debug
 
 # production mode
-$ npm run start:prod
+$ yarn start:prod
 ```
 
 ## Test

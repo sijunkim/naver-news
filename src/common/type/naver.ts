@@ -8,18 +8,18 @@
 // };
 // export type News = Breaking | Exclusive;
 
-// type Local = {
-//   name: 'localhost';
+// type Develop = {
+//   name: 'develop';
 // };
 // type Production = {
 //   name: 'production';
 // };
-// export type NODE_ENV = Local | Production;
+// export type NODE_ENV = develop | Production;
 
 export const DuplicationCount = 3;
 
 export type NEWSTYPE = '속보' | '단독';
-type NODE_ENV = 'local' | 'debug' | 'production';
+type NODE_ENV = 'develop' | 'debug' | 'production';
 
 export const DEBUG: NODE_ENV = 'debug';
 export const PRODUCTION: NODE_ENV = 'production';
