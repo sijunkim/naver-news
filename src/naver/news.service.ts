@@ -153,7 +153,7 @@ export class NewsService {
     const companies: string[] = rawCompanies.split(',');
     const companyLink = news.originallink;
     for (const company of companies) {
-      if (company.includes(companyLink)) return false;
+      if (companyLink.includes(company)) return false;
     }
     return true;
   }
@@ -223,10 +223,10 @@ export class NewsService {
           item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
           const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
-          // 메세지 전송
-          await this.slackWebhook.newsSend(newsType, payload);
           // 키워드 설정
           await this.setKeywords(newsType, item);
+          // 메세지 전송
+          await this.slackWebhook.newsSend(newsType, payload);
         } catch (error) {
           console.error(error);
           console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} error`);
