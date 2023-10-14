@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ConfigType } from '@nestjs/config';
 import { HttpResponse } from 'src/entity/httpResponse';
@@ -13,7 +13,11 @@ import { IncomingWebhookSendArguments } from '@slack/webhook';
 import * as dayjs from 'dayjs';
 
 @Injectable()
-export class NewsService {
+export class NewsService implements OnModuleInit {
+  onModuleInit() {
+    console.log(`The module has been initialized.`);
+  }
+
   constructor(
     @Inject(configModule.fileConfig.KEY)
     private fileConfig: ConfigType<typeof configModule.fileConfig>,
@@ -121,7 +125,7 @@ export class NewsService {
     for (const keyword of keywords) {
       // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
       if (count > 3) {
-        console.log(`${'중복 키워드 : '}${duplicationKeywords}`);
+        console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${'중복 키워드 : '}${duplicationKeywords}`);
         return false;
       }
 
@@ -130,6 +134,9 @@ export class NewsService {
         count++;
       }
     }
+
+    // 키워드 설정
+    await this.setKeywords(newsType, news);
 
     return true;
   }
@@ -202,7 +209,7 @@ export class NewsService {
 
   async getJustifiedNews(newsType: NEWSTYPE, news: Array<News>): Promise<Array<News>> {
     const justifiedNews: Array<News> = new Array<News>();
-    for (const item of news.reverse()) {
+    for await (const item of news.reverse()) {
       const result = await this.checkNewsJustified(newsType, item);
       if (result) justifiedNews.push(item);
     }
@@ -214,7 +221,7 @@ export class NewsService {
     if (news.length > 0) {
       const firstItemPubDate = news[news.length - 1].pubDate;
 
-      for (const item of news) {
+      for await (const item of news) {
         try {
           // 데이터 정제
           item.title = this.newsRefiner.htmlParsingToText(item.title);
@@ -223,8 +230,6 @@ export class NewsService {
           item.company = this.newsRefiner.substractComapny(item.link, item.originallink);
           const payload: IncomingWebhookSendArguments = this.newsRefiner.getRefineNews(item);
 
-          // 키워드 설정
-          await this.setKeywords(newsType, item);
           // 메세지 전송
           await this.slackWebhook.newsSend(newsType, payload);
         } catch (error) {
@@ -232,7 +237,7 @@ export class NewsService {
           console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} error`);
         }
       }
-      await this.setLastReceivedTime(newsType, firstItemPubDate);
+      await this.setLastReceivedTime(newsType, dayjs(firstItemPubDate).format('YYYY-MM-DD HH:mm'));
     }
     console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} success`);
 
