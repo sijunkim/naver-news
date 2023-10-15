@@ -1,30 +1,41 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
+  <img src="/contents/image/slack_capture1.png" width="960" alt="Slack Capture1" />
 </p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
+1분에 한번씩 네이버 속보, 단독 뉴스를 슬랙 웹훅으로 보내주는 배치, 웹서버입니다.<br />
+<u>프로그램을 시작하기 전에 네이버 API 인증정보, 슬랙 웹훅 주소 설정해야 합니다.</u>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 주요 기능
+1. 프로그램 시작 시 환경변수에 정의된 txt 파일이 없을 경우 생성합니다.
+2. develop, debug, production 환경을 분리하여 실행 가능합니다.
+3. 제외 키워드 및 뉴스사 설정 가능 가능합니다.
+4. 중복 키워드 관리 및 2시간 주기로 키워드를 초기화 합니다.(주기 변경 가능)
+5. 1분 주기로 슬랙 웹훅 주소로 뉴스를 보내줍니다.(주기 변경 가능)
+
+## Environments
+#### - ENVIRONMENT
+APP_PORT=3500
+
+#### - NAVER
+NAVER_CLIENT_ID=
+NAVER_CLIENT_SECRET=
+NAVER_OPENAPI_URL=https://openapi.naver.com/v1/search/news.xml?query=
+
+#### - TXT FILE 
+BREAKING_KEYWORD=src/data/keyword/breakingKeyword.txt
+BREAKING_LAST_RECEIVED_TIME=src/data/time/breakingLastReceivedTime.txt
+BREAKING_EXCEPT_KEYWORD=src/data/except/breakingKeyword.txt
+EXCLUSIVE_KEYWORD=src/data/keyword/exclusiveKeyword.txt
+EXCLUSIVE_LAST_RECEIVED_TIME=src/data/time/exclusiveLastReceivedTime.txt
+EXCLUSIVE_EXCEPT_KEYWORD=src/data/except/exclusiveKeyword.txt
+EXCEPT_COMPANY=src/data/except/company.txt
+
+
+#### - SLACK
+BREAKING_NEWS_WEBHOOK_URL=
+EXCLUSIVE_NEWS_WEBHOOK_URL=
+DEVELOP_WEBHOOK_URL=
 
 ## Installation
 
@@ -64,9 +75,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Kim Si Jun](papaya9349@naver.com)
 
 ## License
 
