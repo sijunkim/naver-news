@@ -20,9 +20,9 @@ export default class NewsBatch {
     }
   }
 
-  // @Timeout(0)
+  @Timeout(0)
   async exclusiveNewsTimeout() {
-    if (UtilService.isDebug()) {
+    if (UtilService.isDevelop() || UtilService.isDebug()) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
@@ -30,7 +30,7 @@ export default class NewsBatch {
     }
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async breakingNewsCron() {
     if (UtilService.isProduction()) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
@@ -40,7 +40,7 @@ export default class NewsBatch {
     }
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async exclusiveNewsCron() {
     if (UtilService.isProduction()) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
@@ -52,7 +52,7 @@ export default class NewsBatch {
 
   @Cron(CronExpression.EVERY_2_HOURS)
   async makeKeywordFilesCron() {
-    if (UtilService.isProduction()) {
+    if (UtilService.isDevelop() || UtilService.isProduction()) {
       await this.newsService.resetNaverNewsKeyword();
     }
   }
