@@ -15,7 +15,47 @@ import * as dayjs from 'dayjs';
 @Injectable()
 export class NewsService implements OnModuleInit {
   onModuleInit() {
-    console.log(`The module has been initialized.`);
+    const breakingExceptKeywordFilePath = this.getExceptKeywordFilePath(BreakingNewsType);
+    if (!fs.existsSync(breakingExceptKeywordFilePath)) {
+      fs.writeFileSync(breakingExceptKeywordFilePath, '');
+      console.log(`breakingExceptKeywordFilePath created.`);
+    }
+
+    const exclusiveExceptKeywordFilePath = this.getExceptKeywordFilePath(ExclusiveNewsType);
+    if (!fs.existsSync(exclusiveExceptKeywordFilePath)) {
+      fs.writeFileSync(exclusiveExceptKeywordFilePath, '');
+      console.log(`exclusiveExceptKeywordFilePath created.`);
+    }
+
+    const breakingKeywordFilePath = this.getKeywordFilePath(BreakingNewsType);
+    if (!fs.existsSync(breakingKeywordFilePath)) {
+      fs.writeFileSync(breakingKeywordFilePath, '');
+      console.log(`breakingKeywordFilePath created.`);
+    }
+
+    const exclusiveKeywordFilePath = this.getKeywordFilePath(ExclusiveNewsType);
+    if (!fs.existsSync(exclusiveKeywordFilePath)) {
+      fs.writeFileSync(exclusiveKeywordFilePath, '');
+      console.log(`exclusiveKeywordFilePath created.`);
+    }
+
+    const exceptCompanyFilePath = this.getExceptCompanyFilePath();
+    if (!fs.existsSync(exceptCompanyFilePath)) {
+      fs.writeFileSync(exceptCompanyFilePath, '');
+      console.log(`exceptCompanyFilePath created.`);
+    }
+
+    const breakingLastReceivedTimeFilePath = this.getLastReceivedTimeFilePath(BreakingNewsType);
+    if (!fs.existsSync(breakingLastReceivedTimeFilePath)) {
+      fs.writeFileSync(breakingLastReceivedTimeFilePath, '');
+      console.log(`breakingLastReceivedTimeFilePath created.`);
+    }
+
+    const exclusiveLastReceivedTimeFilePath = this.getLastReceivedTimeFilePath(ExclusiveNewsType);
+    if (!fs.existsSync(exclusiveLastReceivedTimeFilePath)) {
+      fs.writeFileSync(exclusiveLastReceivedTimeFilePath, '');
+      console.log(`exclusiveLastReceivedTimeFilePath created.`);
+    }
   }
 
   constructor(
