@@ -14,28 +14,36 @@
 5. 1분 주기로 슬랙 웹훅 주소로 뉴스를 보내줍니다.(주기 변경 가능)
 
 ## Environments
-#### - ENVIRONMENT
+```bash
+# SERVER PORT
 APP_PORT=3500
 
-#### - NAVER
+# 네이버 클라이언트 정보
 NAVER_CLIENT_ID=
 NAVER_CLIENT_SECRET=
 NAVER_OPENAPI_URL=https://openapi.naver.com/v1/search/news.xml?query=
 
-#### - TXT FILE 
+# TXT FILE 
+# 보낸 속보 뉴스 키워드 목록(, 콤마 사용해서 구분, 2시간에 한번씩 삭제)
 BREAKING_KEYWORD=src/data/keyword/breakingKeyword.txt
+# 마지막으로 속보 뉴스가 전송된 시간
 BREAKING_LAST_RECEIVED_TIME=src/data/time/breakingLastReceivedTime.txt
+# 속보 뉴스에서 제외하고 싶은 키워드(, 콤마 사용해서 구분)
 BREAKING_EXCEPT_KEYWORD=src/data/except/breakingKeyword.txt
+# 보낸 단독 뉴스 키워드 목록(, 콤마 사용해서 구분, 2시간에 한번씩 삭제)
 EXCLUSIVE_KEYWORD=src/data/keyword/exclusiveKeyword.txt
+# 마지막으로 단독 뉴스가 전송된 시간
 EXCLUSIVE_LAST_RECEIVED_TIME=src/data/time/exclusiveLastReceivedTime.txt
+# 단독 뉴스에서 제외하고 싶은 키워드(, 콤마 사용해서 구분)
 EXCLUSIVE_EXCEPT_KEYWORD=src/data/except/exclusiveKeyword.txt
+# 뉴스에서 제외하고 싶은 뉴스사(, 콤마 사용해서 구분)
 EXCEPT_COMPANY=src/data/except/company.txt
 
-
-#### - SLACK
+# 슬랙 웹훅 정보
 BREAKING_NEWS_WEBHOOK_URL=
 EXCLUSIVE_NEWS_WEBHOOK_URL=
 DEVELOP_WEBHOOK_URL=
+```
 
 ## Installation
 
