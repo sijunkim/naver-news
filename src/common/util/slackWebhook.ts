@@ -27,8 +27,8 @@ export default class SlackWebhook {
       await webhook.send(payloads);
 
       // // CHAINPARTNERS
-      // webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
-      // await webhook.send(payloads);
+      webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
+      await webhook.send(payloads);
     }
 
     // Debug, Develop

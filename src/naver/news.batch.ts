@@ -10,7 +10,7 @@ import UtilService from 'src/common/service/utilService';
 export default class NewsBatch {
   constructor(private readonly newsService: NewsService) {}
 
-  @Timeout(0)
+  // @Timeout(0)
   async breakingNewsTimeout() {
     if (UtilService.isDevelop() || UtilService.isDebug()) {
       const result: HttpResponse = await this.newsService.getNaverData(BreakingNewsType);
@@ -20,13 +20,13 @@ export default class NewsBatch {
     }
   }
 
-  @Timeout(0)
+  // @Timeout(0)
   async exclusiveNewsTimeout() {
     if (UtilService.isDevelop() || UtilService.isDebug()) {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
-      if (news.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, justifiedNews);
+      if (justifiedNews.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, justifiedNews);
     }
   }
 
@@ -46,7 +46,7 @@ export default class NewsBatch {
       const result: HttpResponse = await this.newsService.getNaverData(ExclusiveNewsType);
       const news: Array<News> = await this.newsService.getNews(ExclusiveNewsType, result.data);
       const justifiedNews = await this.newsService.getJustifiedNews(ExclusiveNewsType, news);
-      if (news.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, justifiedNews);
+      if (justifiedNews.length > 0) await this.newsService.sendNewsToSlack(ExclusiveNewsType, justifiedNews);
     }
   }
 

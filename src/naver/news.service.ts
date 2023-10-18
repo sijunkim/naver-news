@@ -165,7 +165,9 @@ export class NewsService implements OnModuleInit {
     for (const keyword of keywords) {
       // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
       if (count > 3) {
-        console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${'중복 키워드 : '}${duplicationKeywords}`);
+        console.log(
+          `${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> 중복 ${newsType} 키워드 : ${duplicationKeywords}`,
+        );
         return false;
       }
 
@@ -188,7 +190,9 @@ export class NewsService implements OnModuleInit {
     const keywords: string[] = rawKeywords.split(',');
     const title = news.title.replaceAll(' ', '');
     for (const keyword of keywords) {
-      if (title.includes(keyword)) return false;
+      if (keyword !== '' && title.includes(keyword)) {
+        return false;
+      }
     }
     return true;
   }
@@ -241,7 +245,13 @@ export class NewsService implements OnModuleInit {
     let rawKeywords = '';
     news.title.split(' ').forEach((keyword) => {
       if (savedRawKeywords.includes(keyword) == false) {
-        rawKeywords += `${keyword},`;
+        rawKeywords += `${keyword
+          .replace('[<b>속보</b>]', '')
+          .replace('(<b>속보</b>)', '')
+          .replace('<b>속보</b>', '')
+          .replace('[<b>단독</b>]', '')
+          .replace('(<b>단독</b>)', '')
+          .replace('<b>단독</b>', '')},`;
       }
     });
     await fs.appendFileSync(filePath, rawKeywords, { encoding: 'utf8' });
@@ -279,7 +289,7 @@ export class NewsService implements OnModuleInit {
       }
       await this.setLastReceivedTime(newsType, dayjs(firstItemPubDate).format('YYYY-MM-DD HH:mm'));
     }
-    console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} success`);
+    console.log(`${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> ${newsType} 뉴스 전송 완료`);
 
     return {
       status: 200,
