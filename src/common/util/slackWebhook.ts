@@ -25,10 +25,6 @@ export default class SlackWebhook {
       const url: string = newsType == BreakingNewsType ? breakingNewsWebhookUrl : exclusiveNewsWebhookUrl;
       webhook = new IncomingWebhook(url);
       await webhook.send(payloads);
-
-      // // CHAINPARTNERS
-      webhook = new IncomingWebhook(this.slackConfig.chainpartnersNewsWebhookUrl);
-      await webhook.send(payloads);
     }
 
     // Debug, Develop
