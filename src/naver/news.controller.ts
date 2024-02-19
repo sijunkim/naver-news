@@ -2,10 +2,21 @@ import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { HttpResponse } from 'src/entity/httpResponse';
 import { NEWSTYPE } from 'src/common/type/naver';
 import { NewsService } from './news.service';
+import NewsBatch from './news.batch';
 
 @Controller('naver')
 export class NaverController {
-  constructor(private readonly newsService: NewsService) {}
+  constructor(private readonly newsService: NewsService, private readonly newsBatch: NewsBatch) {}
+
+  @Get('news/breaking')
+  async sendBreakingNews() {
+    await this.newsBatch.breakingNewsTimeout();
+  }
+
+  @Get('news/exclusive')
+  async sendExclusiveNews() {
+    await this.newsBatch.exclusiveNewsTimeout();
+  }
 
   @Get('news/:keyword')
   async getNaverNews(@Param('keyword') newsType: NEWSTYPE): Promise<any> {
