@@ -15,7 +15,7 @@ import UtilService from './common/service/utilService';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [configModule.fileConfig, configModule.naverConfig, configModule.slackConfig],
+      load: [configModule.fileConfig, configModule.naverConfig, configModule.newsConfig, configModule.slackConfig],
       isGlobal: true,
       validationSchema,
     }),

@@ -63,6 +63,9 @@ export class NewsService implements OnModuleInit {
     private fileConfig: ConfigType<typeof configModule.fileConfig>,
     @Inject(configModule.naverConfig.KEY)
     private naverConfig: ConfigType<typeof configModule.naverConfig>,
+    @Inject(configModule.newsConfig.KEY)
+    private newsConfig: ConfigType<typeof configModule.newsConfig>,
+
     private readonly slackWebhook: SlackWebhook,
     private readonly newsRefiner: NewsRefiner,
   ) {}
@@ -162,9 +165,10 @@ export class NewsService implements OnModuleInit {
     const duplicationKeywords = [];
     const rawKeywords = await this.getRawKeywords(newsType);
     const keywords: string[] = rawKeywords.split(',').filter((keyword) => keyword != '');
+    const duplicatedCount = this.newsConfig.duplicatedCount;
     for (const keyword of keywords) {
       // 중복되는 키워드가 3개 이상일 경우 메세지를 발송하지 않도록 설정
-      if (count > 3) {
+      if (count > duplicatedCount) {
         console.log(
           `${dayjs(new Date()).format('YYYY-MM-DD HH:mm')} -> 중복 ${newsType} 키워드 : ${duplicationKeywords}`,
         );
