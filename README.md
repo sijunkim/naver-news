@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="/contents/image/iphone_capture1.jpeg" width="240" alt="iPhone Capture1" />
-  <img src="/contents/image/mac_capture1.png" width="540" alt="MAC Capture1" />
+  <img src="https://github.com/user-attachments/assets/4e0bc593-c913-4b51-b563-6b7ca59bab85" width="320px"/>
+  <img src="https://github.com/user-attachments/assets/f7d06bb2-f666-4543-92a0-ea7ae976e8e3" width="480px"/>
 </p>
 
-## Description
+
 1분에 한번씩 네이버 속보, 단독 뉴스를 슬랙 웹훅으로 보내주는 배치, 웹서버입니다.<br />
 <u>프로그램을 시작하기 전에 네이버 API 인증정보, 슬랙 웹훅 주소 설정해야 합니다.</u>
 
