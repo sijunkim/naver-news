@@ -1,6 +1,6 @@
 <p align="center">
   <img src="/contents/image/iphone_capture1.jpeg" width="240" alt="iPhone Capture1" />
-  <img src="/contents/image/mac_capture1.png" width="600" alt="MAC Capture1" />
+  <img src="/contents/image/mac_capture1.png" width="540" alt="MAC Capture1" />
 </p>
 
 ## Description
