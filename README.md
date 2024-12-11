@@ -4,11 +4,21 @@
   <img src="https://github.com/user-attachments/assets/94e5944e-9872-41b3-bdff-1d3b8e4bb8c2" />
 </p>
 
-1분에 한번씩 네이버 속보, 단독 뉴스를 슬랙 웹훅으로 보내주는 배치, 웹서버입니다.<br />
-<u>프로그램을 시작하기 전에 네이버 API 인증정보, 슬랙 웹훅 주소 설정해야 합니다.</u>
+## 개요
+Naver OPEN API 사용해 속보, 단독 기사들을 분당 한번씩 받아오는 뉴스 웹훅프로그램
 
-### 주요 기능
+## 프로젝트 기간
+2023.01.17 ~ 2023.03.11
 
+## 기술 스택
+- NestJS(Express)
+- Slack Webhook
+
+## 성과
+- 사회적으로 큰 이슈가 발생할 경우 국내 최대 검색 플랫폼에 올라오는 속보/단독 뉴스들을 실시간으로 받아볼 수 있음
+- 세계 각국에서 발생한 다양한 사건/사고 등 다방면의 소식들을 빠르게 접할 수 있게됨
+
+## 주요 기능
 1. 프로그램 시작 시 환경변수에 정의된 txt 파일이 없을 경우 생성합니다.
 2. develop, debug, production 환경을 분리하여 실행 가능합니다.
 3. 제외 키워드 및 뉴스사 설정해 받지 않을 뉴스와 뉴스사를 설정 가능합니다.
@@ -86,10 +96,6 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
 ## Stay in touch
 
